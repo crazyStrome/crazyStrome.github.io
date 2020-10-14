@@ -159,7 +159,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://crazystrome.github.io/2020/10/14/hello-world/">
+    <link itemprop="mainEntityOfPage" href="http://crazystrome.github.io/2020/10/14/JVM%E7%9A%84GC/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -173,7 +173,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2020/10/14/hello-world/" class="post-title-link" itemprop="url">Hello World</a>
+            <a href="/2020/10/14/JVM%E7%9A%84GC/" class="post-title-link" itemprop="url">未命名</a>
         </h2>
 
         <div class="post-meta">
@@ -183,8 +183,15 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2020-10-14 18:19:05" itemprop="dateCreated datePublished" datetime="2020-10-14T18:19:05+08:00">2020-10-14</time>
+              <time title="创建时间：2020-10-14 18:23:20" itemprop="dateCreated datePublished" datetime="2020-10-14T18:23:20+08:00">2020-10-14</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-25 16:07:22" itemprop="dateModified" datetime="2020-03-25T16:07:22+08:00">2020-03-25</time>
+              </span>
 
           
 
@@ -197,19 +204,1452 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+          <!-- TOC -->
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<ul>
+<li><a href="#%E6%A6%82%E8%BF%B0">概述</a></li>
+<li><a href="#%E5%AF%B9%E8%B1%A1%E5%AD%98%E6%B4%BB%E5%88%A4%E6%96%AD">对象存活判断</a></li>
+<li><a href="#%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E7%AE%97%E6%B3%95">垃圾收集算法</a><ul>
+<li><a href="#%E6%A0%87%E8%AE%B0--%E6%B8%85%E9%99%A4%E7%AE%97%E6%B3%95">标记 -清除算法</a></li>
+<li><a href="#%E5%A4%8D%E5%88%B6%E7%AE%97%E6%B3%95">复制算法</a></li>
+<li><a href="#%E6%A0%87%E8%AE%B0-%E5%8E%8B%E7%BC%A9%E7%AE%97%E6%B3%95">标记-压缩算法</a></li>
+<li><a href="#%E5%88%86%E4%BB%A3%E6%94%B6%E9%9B%86%E7%AE%97%E6%B3%95">分代收集算法</a></li>
+</ul>
+</li>
+<li><a href="#%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8">垃圾收集器</a><ul>
+<li><a href="#serial%E6%94%B6%E9%9B%86%E5%99%A8">Serial收集器</a></li>
+<li><a href="#parnew%E6%94%B6%E9%9B%86%E5%99%A8">ParNew收集器</a></li>
+<li><a href="#parallel%E6%94%B6%E9%9B%86%E5%99%A8">Parallel收集器</a></li>
+<li><a href="#cms%E6%94%B6%E9%9B%86%E5%99%A8">CMS收集器</a></li>
+<li><a href="#g1%E6%94%B6%E9%9B%86%E5%99%A8">G1收集器</a></li>
+</ul>
+</li>
+</ul>
+<!-- /TOC -->
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>垃圾收集 Garbage Collection 通常被称为“GC”，它诞生于1960年 MIT 的 Lisp 语言，经过半个多世纪，目前已经十分成熟了。</p>
+<p>jvm 中，程序计数器、虚拟机栈、本地方法栈都是随线程而生随线程而灭，栈帧随着方法的进入和退出做入栈和出栈操作，实现了自动的内存清理，因此，我们的内存垃圾回收<strong>主要集中于 java 堆和方法区中</strong>，在程序运行期间，这部分内存的分配和使用都是动态的。</p>
+<h1 id="对象存活判断"><a href="#对象存活判断" class="headerlink" title="对象存活判断"></a>对象存活判断</h1><p>判断对象是否存活一般有两种方式：</p>
+<ul>
+<li><p>引用计数：每个对象有一个引用计数属性，新增一个引用时计数加1，引用释放时计数减1，计数为0时可以回收。此方法简单，<strong>无法解决对象相互循环引用</strong>的问题。</p>
+</li>
+<li><p>可达性分析（Reachability Analysis）：从GC Roots开始向下搜索，搜索所走过的路径称为引用链。当一个对象到GC Roots没有任何引用链相连时，则证明此对象是不可用的。不可达对象。</p>
+<p>  在Java语言中，<strong>GC Roots</strong>包括：</p>
+<ul>
+<li>虚拟机栈中引用的对象。</li>
+<li>方法区中类静态属性实体引用的对象。</li>
+<li>方法区中常量引用的对象。</li>
+<li>本地方法栈中JNI引用的对象。</li>
+</ul>
+</li>
+</ul>
+<h1 id="垃圾收集算法"><a href="#垃圾收集算法" class="headerlink" title="垃圾收集算法"></a>垃圾收集算法</h1><h2 id="标记-清除算法"><a href="#标记-清除算法" class="headerlink" title="标记 -清除算法"></a>标记 -清除算法</h2><p><strong>标记-清除</strong>”（Mark-Sweep）算法，如它的名字一样，算法分为“标记”和“清除”两个阶段：首先标记出所有需要回收的对象，在标记完成后统一回收掉所有被标记的对象。之所以说它是最基础的收集算法，是因为后续的收集算法都是基于这种思路并对其缺点进行改进而得到的。</p>
+<p>它的主要缺点有两个：一个是效率问题，标记和清除过程的效率都不高；另外一个是空间问题，标记清除之后会产生大量不连续的内存碎片，<strong>空间碎片太多</strong>可能会导致，当程序在以后的运行过程中需要分配较大对象时无法找到足够的连续内存而不得不提前触发另一次垃圾收集动作。</p>
+<p><img src="https://i.loli.net/2020/03/22/3jgKSmnZk6xTwoa.png" alt="wpsA73E.tmp"></p>
+<h2 id="复制算法"><a href="#复制算法" class="headerlink" title="复制算法"></a>复制算法</h2><p>“复制”（Copying）的收集算法，它将可用内存按容量划分为大小相等的两块，每次只使用其中的一块。当这一块的内存用完了，就将还存活着的对象复制到另外一块上面，然后再把已使用过的内存空间一次清理掉。</p>
+<p>这样使得每次都是对其中的一块进行内存回收，内存分配时也就不用考虑内存碎片等复杂情况，只要移动堆顶指针，按顺序分配内存即可，实现简单，运行高效。只是这种算法的代价是将内存缩小为原来的一半，持续复制长生存期的对象则导致效率降低。</p>
+<p><img src="https://i.loli.net/2020/03/22/lGu64nzhWyTDwO8.png" alt="wps9D31.tmp"></p>
+<h2 id="标记-压缩算法"><a href="#标记-压缩算法" class="headerlink" title="标记-压缩算法"></a>标记-压缩算法</h2><p>复制收集算法在对象存活率较高时就要执行较多的复制操作，效率将会变低。更关键的是，如果不想浪费50%的空间，就需要有额外的空间进行分配担保，以应对被使用的内存中所有对象都100%存活的极端情况，所以在老年代一般不能直接选用这种算法。</p>
+<p>根据老年代的特点，有人提出了另外一种“标记-整理”（Mark-Compact）算法，标记过程仍然与“标记-清除”算法一样，但后续步骤不是直接对可回收对象进行清理，而是让所有存活的对象都向一端移动，然后直接清理掉端边界以外的内存</p>
+<p><img src="https://i.loli.net/2020/03/22/p5yQUKw9TqZAV3h.png" alt="wps3952.tmp"></p>
+<h2 id="分代收集算法"><a href="#分代收集算法" class="headerlink" title="分代收集算法"></a>分代收集算法</h2><p>GC分代的基本假设：绝大部分对象的生命周期都非常短暂，存活时间短。</p>
+<p>“分代收集”（Generational Collection）算法，把Java堆分为新生代和老年代，这样就可以根据各个年代的特点采用最适当的收集算法。在新生代中，每次垃圾收集时都发现有大批对象死去，只有少量存活，那就选用复制算法，只需要付出少量存活对象的复制成本就可以完成收集。而老年代中因为对象存活率高、没有额外空间对它进行分配担保，就必须使用“标记-清理”或“标记-整理”算法来进行回收。</p>
+<h1 id="垃圾收集器"><a href="#垃圾收集器" class="headerlink" title="垃圾收集器"></a>垃圾收集器</h1><p> 如果说收集算法是内存回收的方法论，垃圾收集器就是内存回收的具体实现</p>
+<h2 id="Serial收集器"><a href="#Serial收集器" class="headerlink" title="Serial收集器"></a>Serial收集器</h2><p>串行收集器是最古老，最稳定以及效率高的收集器，可能会产生较长的停顿，只使用<strong>一个线程</strong>去回收。新生代、老年代使用<strong>串行</strong>回收；<strong>新生代复制算法</strong>、<strong>老年代标记-压缩</strong>；垃圾收集的过程中会Stop The World（服务暂停）</p>
+<p>参数控制：**-XX:+UseSerialGC** 串行收集器</p>
+<p><img src="https://i.loli.net/2020/03/22/HDrYLuqMGCSiF76.png" alt="wpsA77.tmp"></p>
+<h2 id="ParNew收集器"><a href="#ParNew收集器" class="headerlink" title="ParNew收集器"></a>ParNew收集器</h2><p>ParNew收集器其实就是Serial收集器的多线程版本。<strong>新生代并行，老年代串行；</strong>新生代复制算法、老年代标记-压缩</p>
+<p>参数控制：**-XX:+UseParNewGC** ParNew收集器</p>
+<p><strong>-XX:ParallelGCThreads</strong> 限制线程数量</p>
+<p><img src="https://i.loli.net/2020/03/22/fkvPBayLU8oZuHY.png" alt="wps6A83.tmp"></p>
+<h2 id="Parallel收集器"><a href="#Parallel收集器" class="headerlink" title="Parallel收集器"></a>Parallel收集器</h2><p>Parallel Scavenge收集器类似ParNew收集器，Parallel收集器更关注系统的<strong>吞吐量</strong>。可以通过参数来打开<strong>自适应调节策略，</strong>虚拟机会根据当前系统的运行情况收集性能监控信息，动态调整这些参数以提供最合适的停顿时间或最大的吞吐量；也可以通过参数控制GC的时间不大于多少毫秒或者比例；新生代复制算法、老年代标记-压缩</p>
+<p>参数控制：**-XX:+UseParallelGC** 使用Parallel收集器+ 老年代串行</p>
+<p><strong>Paralle**</strong>l** <strong>Old</strong> <strong>收集器</strong></p>
+<p>Parallel Old是Parallel Scavenge收集器的老年代版本，使用多线程和“标记－整理”算法。这个收集器是在JDK 1.6中才开始提供</p>
+<p>参数控制： <strong>-XX:+UseParallelOldGC</strong> 使用Parallel收集器+ 老年代并行</p>
+<h2 id="CMS收集器"><a href="#CMS收集器" class="headerlink" title="CMS收集器"></a>CMS收集器</h2><p>CMS（Concurrent Mark Sweep）收集器是一种以获取最短回收停顿时间为目标的收集器。目前很大一部分的Java应用都集中在互联网站或B/S系统的服务端上，这类应用尤其重视服务的响应速度，希望系统停顿时间最短，以给用户带来较好的体验。</p>
+<p>从名字（包含“Mark Sweep”）上就可以看出CMS收集器是基于“标记-清除”算法实现的，它的运作过程相对于前面几种收集器来说要更复杂一些，整个过程分为4个步骤，包括： </p>
+<ul>
+<li><p>初始标记（CMS initial mark）</p>
+</li>
+<li><p>并发标记（CMS concurrent mark）</p>
+</li>
+<li><p>重新标记（CMS remark）</p>
+</li>
+<li><p>并发清除（CMS concurrent sweep）</p>
+</li>
+</ul>
+<p>其中初始标记、重新标记这两个步骤仍然需要“Stop The World”。初始标记仅仅只是标记一下GC Roots能直接关联到的对象，速度很快，并发标记阶段就是进行GC Roots Tracing的过程，而重新标记阶段则是为了修正并发标记期间，因用户程序继续运作而导致标记产生变动的那一部分对象的标记记录，这个阶段的停顿时间一般会比初始标记阶段稍长一些，但远比并发标记的时间短。</p>
+<p>由于整个过程中耗时最长的并发标记和并发清除过程中，收集器线程都可以与用户线程一起工作，所以总体上来说，CMS收集器的内存回收过程是与用户线程一起并发地执行。<strong>老年代收集器</strong>（新生代使用ParNew）</p>
+<p>优点:<strong>并发收集</strong>、<strong>低停顿</strong> </p>
+<p>缺点：<strong>产生大量空间碎片、并发阶段会降低吞吐量</strong></p>
+<p>参数控制：</p>
+<ul>
+<li><p><code>-XX:+UseConcMarkSweepGC</code>：使用CMS收集器</p>
+</li>
+<li><p><code>-XX:+ UseCMSCompactAtFullCollection</code>：Full GC后，进行一次碎片整理；整理过程是独占的，会引起停顿时间变长</p>
+</li>
+<li><p><code>-XX:+CMSFullGCsBeforeCompaction</code>：设置进行几次Full GC后，进行一次碎片整理</p>
+</li>
+<li><p><code>-XX:ParallelCMSThreads</code>：设定CMS的线程数量（一般情况约等于可用CPU数量）</p>
+</li>
+</ul>
+<p><img src="https://i.loli.net/2020/03/22/phWjSYlc2xzB38s.png" alt="wpsCA6E.tmp"></p>
+<h2 id="G1收集器"><a href="#G1收集器" class="headerlink" title="G1收集器"></a>G1收集器</h2><p>G1是目前技术发展的最前沿成果之一，HotSpot开发团队赋予它的使命是未来可以替换掉JDK1.5中发布的CMS收集器。与CMS收集器相比G1收集器有以下特点：</p>
+<ol>
+<li><p><strong>空间整合</strong>，G1收集器采用标记整理算法，不会产生内存空间碎片。分配大对象时不会因为无法找到连续空间而提前触发下一次GC。</p>
+</li>
+<li><p><strong>可预测停顿</strong>，这是G1的另一大优势，降低停顿时间是G1和CMS的共同关注点，但G1除了追求低停顿外，还能建立可预测的停顿时间模型，能让使用者明确指定在一个长度为N毫秒的时间片段内，消耗在垃圾收集上的时间不得超过N毫秒，这几乎已经是实时Java（RTSJ）的垃圾收集器的特征了。</p>
+</li>
+</ol>
+<p>上面提到的垃圾收集器，收集的范围都是整个新生代或者老年代，而G1不再是这样。使用G1收集器时，Java堆的内存布局与其他收集器有很大差别，它将整个Java堆划分为多个大小相等的独立区域（Region），虽然还保留有新生代和老年代的概念，但新生代和老年代不再是物理隔阂了，它们都是一部分（可以不连续）Region的集合。</p>
+<p><img src="https://i.loli.net/2020/03/22/vOjk3RxCoAWTdX9.jpg" alt="wps3B4C.tmp"></p>
+<p>G1的新生代收集跟ParNew类似，当新生代占用达到一定比例的时候，开始出发收集。和CMS类似，G1收集器收集老年代对象会有短暂停顿。</p>
+<p><strong>收集步骤</strong>：</p>
+<ol>
+<li><p><strong>标记阶段</strong>，首先初始标记(Initial-Mark),这个阶段是停顿的(Stop the World Event)，并且会触发一次普通Mintor GC。对应GC log:GC pause (young) (inital-mark)</p>
+</li>
+<li><p><strong>Root Region Scanning</strong>，程序运行过程中会回收survivor区(存活到老年代)，这一过程必须在young GC之前完成。</p>
+</li>
+<li><p><strong>Concurrent Marking</strong>，在整个堆中进行并发标记(和应用程序并发执行)，此过程可能被young GC中断。在并发标记阶段，若发现区域对象中的所有对象都是垃圾，那个这个区域会被立即回收(图中打X)。同时，并发标记过程中，会计算每个区域的对象活性(区域中存活对象的比例)。</p>
+</li>
+</ol>
+<p><img src="https://i.loli.net/2020/03/22/qlAZUEJ9BMWiged.png" alt="wps93E7.tmp"></p>
+<ol start="4">
+<li><p><strong>Remark</strong>, 再标记，会有短暂停顿(STW)。再标记阶段是用来收集 并发标记阶段 产生新的垃圾(并发阶段和应用程序一同运行)；G1中采用了比CMS更快的初始快照算法:snapshot-at-the-beginning (SATB)。</p>
+</li>
+<li><p><strong>Copy/Clean up</strong>，多线程清除失活对象，会有STW。G1将回收区域的存活对象拷贝到新区域，清除Remember Sets，并发清空回收区域并把它返回到空闲区域链表中。</p>
+</li>
+</ol>
+<p><img src="/C:/Users/14154/AppData/Local/Temp/msohtmlclip1/01/clip_image009.png" alt="wps47EC.tmp"></p>
+<ol start="6">
+<li>复制/清除过程后。回收区域的活性对象已经被集中回收到深蓝色和深绿色区域。</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+      
+    </div>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://crazystrome.github.io/2020/10/14/java%E5%B9%B6%E5%8F%91%E5%AE%9E%E6%88%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="crazyStrome">
+      <meta itemprop="description" content="啥都写">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="crazyStrome的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/java%E5%B9%B6%E5%8F%91%E5%AE%9E%E6%88%98/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 18:23:20" itemprop="dateCreated datePublished" datetime="2020-10-14T18:23:20+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-08-09 16:24:40" itemprop="dateModified" datetime="2020-08-09T16:24:40+08:00">2020-08-09</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>[TOC]</p>
+<h3 id="2-3-1-内部锁"><a href="#2-3-1-内部锁" class="headerlink" title="2.3.1.  内部锁"></a>2.3.1.  内部锁</h3><p>每个Java对象都可以隐式地扮演一个用于同步的锁的角色；这些内置的锁成为内部锁或者监视器锁。内部锁在Java中扮演了互斥锁的角色。</p>
+<h3 id="2-3-2-可重入锁"><a href="#2-3-2-可重入锁" class="headerlink" title="2.3.2.  可重入锁"></a>2.3.2.  可重入锁</h3><p>当一个线程请求其他线程已经占有的锁时，请求线程将被阻塞。然而内部锁时可重入的，因此线程在试图获得它自己占有的锁时，请求会成功。可重入意味着所请求的是基于每线程而不是基于每调用的。可重入的实现是通过为每一个锁关联一个请求计数和一个占有它的线程。当计数为0时，认为锁是未被占有的。线程请求一个未被占有的锁时，JVM将记录锁的占有者，并将请求计数置为一。如果同一线程再次请求这个锁，计数将递增；每次占用线程退出同步块，计数器值将递减。直到计数器达到0，锁被释放。</p>
+<h3 id="3-1-4-Volatile变量"><a href="#3-1-4-Volatile变量" class="headerlink" title="3.1.4.  Volatile变量"></a>3.1.4.  Volatile变量</h3><p>Volatile确保对一个变量的更新以可预见的方式告知其他的线程。访问Volatile变量不会加锁，也就不会引起线程的阻塞，这使得Volatile相对于sychronized而言，是轻量级的同步。</p>
+<p>Volatile通常用作标识完成、中断、状态的标记使用。</p>
+<p>加锁可以保证可见性与原子性，volatile只能保证可见性。</p>
+<h2 id="3-2-发布和逸出"><a href="#3-2-发布和逸出" class="headerlink" title="3.2.  发布和逸出"></a>3.2.  发布和逸出</h2><p>发布一个对象的意思是它能够被当前范围之外的代码所使用。比如将一个引用存储到其他代码可以访问的地方，在一个非私有的方法中返回这个引用，也可以把它传递到其他类的方法中。</p>
+<p>一个对象在尚未准备好时就将它发布，这种情况称作逸出。</p>
+<h3 id="3-3-3-ThreadLocal"><a href="#3-3-3-ThreadLocal" class="headerlink" title="3.3.3.  ThreadLocal"></a>3.3.3.  ThreadLocal</h3><p>ThreadLocal提供了get和set访问器，为每个使用它的线程维护一份单独的拷贝。所以get总是返回由当前执行线程通过set设置的最新值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ThreadLocalClass</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ThreadLocal&lt;String&gt; local = <span class="keyword">new</span> ThreadLocal&lt;String&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">protected</span> String <span class="title">initialValue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;this is threadlocal initialization&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="string">&quot;hi&quot;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        System.out.println(<span class="string">&quot;11111&quot;</span>);</span><br><span class="line">        System.out.println(local.get());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>线程首次调用ThreadLocal.get方法时，会请求initialValue提供一个初始值。</p>
+<h2 id="3-4-不可变性"><a href="#3-4-不可变性" class="headerlink" title="3.4.  不可变性"></a>3.4.  不可变性</h2><p>不可变对象天生是安全的。</p>
+<p>只有满足如下状态，一个对象才是不可变的：</p>
+<ul>
+<li>它的状态不能在创建后再被修改</li>
+<li>所有域都是final类型</li>
+<li>它被正确创建（创建期间没有发生this引用的逸出）</li>
+</ul>
+<h3 id="3-4-1-Final域"><a href="#3-4-1-Final域" class="headerlink" title="3.4.1.  Final域"></a>3.4.1.  Final域</h3><p>final关键字对不可变对象的创建提供了支持。final域是不能修改的，尽管如果final域指向的对象是可变的，这个对象仍然可以被修改。</p>
+<h3 id="3-5-4-高效不可变对象"><a href="#3-5-4-高效不可变对象" class="headerlink" title="3.5.4.  高效不可变对象"></a>3.5.4.  高效不可变对象</h3><p>一个对象在技术上不是不可变的，但是它的状态不会在发布后被修改，这样的对象成为高效不可变对象。</p>
+<h3 id="3-5-5-可变对象"><a href="#3-5-5-可变对象" class="headerlink" title="3.5.5.  可变对象"></a>3.5.5.  可变对象</h3><p>发布对象的必要条件依赖于对象的可变性：</p>
+<ul>
+<li>不可变对象可以通过任意机制发布</li>
+<li>高效不可变对象必须要安全发布</li>
+<li>可变对象必须要安全发布，同时必须要线程安全或者是被锁保护</li>
+</ul>
+<h3 id="3-5-6-安全地共享对象"><a href="#3-5-6-安全地共享对象" class="headerlink" title="3.5.6.  安全地共享对象"></a>3.5.6.  安全地共享对象</h3><p>在并发程序中，使用和共享对象的一些最有效的策略如下：</p>
+<p>线程限制：一个线程限制的对象，通过限制在线程里，而被线程独占，只能被占有它的线程修改。</p>
+<p>共享只读：一个共享的只读对象，在没有额外同步的情况下，可以被多个线程并发地访问，但是任何线程都不能修改它。共享只读对象包括不可变对象和高效不可变对象。</p>
+<p>共享线程安全：一个线程安全的对象在内部进行同步，所以其他线程无需额外同步，就可以通过公共接口随意地访问他。</p>
+<p>被守护的：一个被守护的对象只能通过特定的锁来访问。被守护的对象包括那些被线程安全对象封装的对象，和已知被特定的锁保护起来的已发布对象。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://crazystrome.github.io/2020/10/14/HashMap%E7%9B%B8%E5%85%B3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="crazyStrome">
+      <meta itemprop="description" content="啥都写">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="crazyStrome的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/HashMap%E7%9B%B8%E5%85%B3/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 18:23:20" itemprop="dateCreated datePublished" datetime="2020-10-14T18:23:20+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-25 16:07:10" itemprop="dateModified" datetime="2020-03-25T16:07:10+08:00">2020-03-25</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <!-- TOC -->
+
+<ul>
+<li><a href="#hashmap%E7%9B%B8%E5%85%B3%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98">HashMap相关面试问题</a><ul>
+<li><a href="#%E4%BD%A0%E7%9F%A5%E9%81%93hashmap%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E5%90%97%E4%BD%A0%E7%9F%A5%E9%81%93hashmap%E7%9A%84get%E6%96%B9%E6%B3%95%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E5%90%97">你知道HashMap的工作原理吗？你知道HashMap的get()方法的工作原理吗？</a></li>
+<li><a href="#%E5%BD%93%E4%B8%A4%E4%B8%AA%E5%AF%B9%E8%B1%A1%E7%9A%84hashcode%E7%9B%B8%E5%90%8C%E4%BC%9A%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88">当两个对象的hashcode相同会发生什么？</a></li>
+<li><a href="#%E5%A6%82%E6%9E%9C%E4%B8%A4%E4%B8%AA%E9%94%AE%E7%9A%84hashcode%E7%9B%B8%E5%90%8C%E4%BD%A0%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96%E5%80%BC%E5%AF%B9%E8%B1%A1">如果两个键的hashcode相同，你如何获取值对象？</a></li>
+<li><a href="#%E5%A6%82%E6%9E%9Chashmap%E7%9A%84%E5%A4%A7%E5%B0%8F%E8%B6%85%E8%BF%87%E4%BA%86%E8%B4%9F%E8%BD%BD%E5%9B%A0%E5%AD%90load-factor%E5%AE%9A%E4%B9%89%E7%9A%84%E5%AE%B9%E9%87%8F%E6%80%8E%E4%B9%88%E5%8A%9E">如果HashMap的大小超过了负载因子(load factor)定义的容量，怎么办？</a></li>
+<li><a href="#%E4%BD%A0%E4%BA%86%E8%A7%A3%E9%87%8D%E6%96%B0%E8%B0%83%E6%95%B4hashmap%E5%A4%A7%E5%B0%8F%E5%AD%98%E5%9C%A8%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98%E5%90%97">你了解重新调整HashMap大小存在什么问题吗？</a></li>
+<li><a href="#%E4%BD%A0%E8%AF%B4hashmap%E7%9A%84get%E8%BF%AD%E4%BB%A3%E4%BA%86%E4%B8%80%E4%B8%AA%E9%93%BE%E8%A1%A8%E9%82%A3%E6%80%8E%E4%B9%88%E4%BF%9D%E8%AF%81hashmap%E7%9A%84%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6o1%E9%93%BE%E8%A1%A8%E7%9A%84%E6%9F%A5%E6%89%BE%E7%9A%84%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%8F%88%E6%98%AF%E5%A4%9A%E5%B0%91">你说HashMap的get迭代了一个链表，那怎么保证HashMap的时间复杂度O(1)?链表的查找的时间复杂度又是多少？</a></li>
+<li><a href="#put%E6%97%B6%E6%98%AF%E5%8A%A0%E5%88%B0%E9%93%BE%E8%A1%A8%E5%A4%B4%E8%BF%98%E6%98%AF%E9%93%BE%E8%A1%A8%E5%B0%BE">put时，是加到链表头还是链表尾</a></li>
+<li><a href="#%E4%BC%A0%E7%BB%9F-hashmap-%E7%9A%84%E7%BC%BA%E7%82%B9">传统 HashMap 的缺点</a></li>
+<li><a href="#hashmap-hashtable-linkedhashmap-%E5%92%8Ctreemap">HashMap Hashtable LinkedHashMap 和TreeMap</a></li>
+</ul>
+</li>
+</ul>
+<!-- /TOC -->
+<h1 id="HashMap相关面试问题"><a href="#HashMap相关面试问题" class="headerlink" title="HashMap相关面试问题"></a>HashMap相关面试问题</h1><h2 id="你知道HashMap的工作原理吗？你知道HashMap的get-方法的工作原理吗？"><a href="#你知道HashMap的工作原理吗？你知道HashMap的get-方法的工作原理吗？" class="headerlink" title="你知道HashMap的工作原理吗？你知道HashMap的get()方法的工作原理吗？"></a>你知道HashMap的工作原理吗？你知道HashMap的get()方法的工作原理吗？</h2><p>HashMap是基于hashing的原理，我们使用put(key, value)存储对象到HashMap中，使用get(key)从HashMap中获取对象。当我们给put()方法传递键和值时，我们先对键调用hashCode()方法，返回的hashCode用于找到bucket位置来储存Entry对象。</p>
+<h2 id="当两个对象的hashcode相同会发生什么？"><a href="#当两个对象的hashcode相同会发生什么？" class="headerlink" title="当两个对象的hashcode相同会发生什么？"></a>当两个对象的hashcode相同会发生什么？</h2><p>因为hashcode相同，所以它们的bucket位置相同，‘碰撞’会发生。因为HashMap使用LinkedList存储对象，这个Entry(包含有键值对的Map.Entry对象)会存储在LinkedList中。(当向 HashMap 中添加 key-value 对，由其 key 的 hashCode() 返回值决定该 key-value 对（就是 Entry 对象）的存储位置。当两个 Entry 对象的 key 的 hashCode() 返回值相同时，将由 key 通过 eqauls() 比较值决定是采用覆盖行为（返回 true），还是产生 Entry 链（返回 false）。)，此时若你能讲解JDK1.8红黑树引入，面试官或许会刮目相看。</p>
+<h2 id="如果两个键的hashcode相同，你如何获取值对象？"><a href="#如果两个键的hashcode相同，你如何获取值对象？" class="headerlink" title="如果两个键的hashcode相同，你如何获取值对象？"></a>如果两个键的hashcode相同，你如何获取值对象？</h2><p>当我们调用get()方法，HashMap会使用键对象的hashcode找到bucket位置，然后获取值对象。如果有两个值对象储存在同一个bucket，将会遍历LinkedList直到找到值对象。找到bucket位置之后，会调用keys.equals()方法去找到LinkedList中正确的节点，最终找到要找的值对象。(当程序通过 key 取出对应 value 时，系统只要先计算出该 key 的 hashCode() 返回值，在根据该 hashCode 返回值找出该 key 在 table 数组中的索引，然后取出该索引处的 Entry，最后返回该 key 对应的 value 即可。)</p>
+<h2 id="如果HashMap的大小超过了负载因子-load-factor-定义的容量，怎么办？"><a href="#如果HashMap的大小超过了负载因子-load-factor-定义的容量，怎么办？" class="headerlink" title="如果HashMap的大小超过了负载因子(load factor)定义的容量，怎么办？"></a>如果HashMap的大小超过了负载因子(load factor)定义的容量，怎么办？</h2><p>当一个map填满了75%的bucket时候，和其它集合类(如ArrayList等)一样，将会创建原来HashMap大小的两倍的bucket数组，来重新调整map的大小，并将原来的对象放入新的bucket数组中。这个过程叫作rehashing，因为它调用hash方法找到新的bucket位置。</p>
+<h2 id="你了解重新调整HashMap大小存在什么问题吗？"><a href="#你了解重新调整HashMap大小存在什么问题吗？" class="headerlink" title="你了解重新调整HashMap大小存在什么问题吗？"></a>你了解重新调整HashMap大小存在什么问题吗？</h2><p>当重新调整HashMap大小的时候，确实存在条件竞争，因为如果两个线程都发现HashMap需要重新调整大小了，它们会同时试着调整大小。在调整大小的过程中，存储在LinkedList中的元素的次序会反过来，因为移动到新的bucket位置的时候，HashMap并不会将元素放在LinkedList的尾部，而是放在头部，这是为了避免尾部遍历(tail traversing)。如果条件竞争发生了，那么就死循环了。这个时候，你可以质问面试官，为什么这么奇怪，要在多线程的环境下使用HashMap呢？</p>
+<h2 id="你说HashMap的get迭代了一个链表，那怎么保证HashMap的时间复杂度O-1-链表的查找的时间复杂度又是多少？"><a href="#你说HashMap的get迭代了一个链表，那怎么保证HashMap的时间复杂度O-1-链表的查找的时间复杂度又是多少？" class="headerlink" title="你说HashMap的get迭代了一个链表，那怎么保证HashMap的时间复杂度O(1)?链表的查找的时间复杂度又是多少？"></a>你说HashMap的get迭代了一个链表，那怎么保证HashMap的时间复杂度O(1)?链表的查找的时间复杂度又是多少？</h2><p>分四步：</p>
+<ul>
+<li><p>判断key，根据key算出索引。</p>
+</li>
+<li><p>根据索引获得索引位置所对应的键值对链表。</p>
+</li>
+<li><p>遍历键值对链表，根据key找到对应的Entry键值对。</p>
+</li>
+<li><p>拿到value。</p>
+</li>
+</ul>
+<p>分析：</p>
+<p>以上四步要保证HashMap的时间复杂度O(1)，需要保证每一步都是O(1)，现在看起来就第三步对链表的循环的时间复杂度影响最大，链表查找的时间复杂度为O(n)，与链表长度有关。我们要保证那个链表长度为1，才可以说时间复杂度能满足O(1)。但这么说来只有那个hash算法尽量减少冲突，才能使链表长度尽可能短，理想状态为1。因此可以得出结论：HashMap的查找时间复杂度只有在最理想的情况下才会为O(1)，而要保证这个理想状态不是我们开发者控制的。</p>
+<h2 id="put时，是加到链表头还是链表尾"><a href="#put时，是加到链表头还是链表尾" class="headerlink" title="put时，是加到链表头还是链表尾"></a>put时，是加到链表头还是链表尾</h2><p>jdk8之前的是链表头，JDK8是链表尾</p>
+<h2 id="传统-HashMap-的缺点"><a href="#传统-HashMap-的缺点" class="headerlink" title="传统 HashMap 的缺点"></a>传统 HashMap 的缺点</h2><p>JDK 1.8 以前 HashMap 的实现是 数组+链表，即使哈希函数取得再好，也很难达到元素百分百均匀分布。</p>
+<p>当 HashMap 中有大量的元素都存放到同一个桶中时，这个桶下有一条长长的链表，这个时候 HashMap 就相当于一个单链表，假如单链表有 n 个元素，遍历的时间复杂度就是 O(n)，完全失去了它的优势。</p>
+<p>针对这种情况，JDK 1.8 中引入了 红黑树（查找时间复杂度为 O(logn)）来优化这个问题。</p>
+<h2 id="HashMap-Hashtable-LinkedHashMap-和TreeMap"><a href="#HashMap-Hashtable-LinkedHashMap-和TreeMap" class="headerlink" title="HashMap Hashtable LinkedHashMap 和TreeMap"></a>HashMap Hashtable LinkedHashMap 和TreeMap</h2><p>Map主要用于存储健值对，根据键得到值，因此不允许键重复(重复了覆盖了),但允许值重复。</p>
+<p>Hashmap 是一个最常用的Map,它根据键的HashCode值存储数据,根据键可以直接获取它的值，具有很快的访问速度，遍历时，取得数据的顺序是完全随机的。 HashMap最多只允许一条记录的键为Null;允许多条记录的值为 Null;HashMap不支持线程的同步，即任一时刻可以有多个线程同时写HashMap;可能会导致数据的不一致。如果需要同步，可以用 Collections的synchronizedMap方法使HashMap具有同步的能力，或者使用ConcurrentHashMap。</p>
+<p>Hashtable与 HashMap类似,它继承自Dictionary类，不同的是:它不允许记录的键或者值为空;它支持线程的同步，即任一时刻只有一个线程能写Hashtable,因此也导致了 Hashtable在写入时会比较慢。</p>
+<p>LinkedHashMap 是HashMap的一个子类，保存了记录的插入顺序，在用Iterator遍历LinkedHashMap时，先得到的记录肯定是先插入的.也可以在构造时用带参数，按照应用次数排序。在遍历的时候会比HashMap慢，不过有种情况例外，当HashMap容量很大，实际数据较少时，遍历起来可能会比 LinkedHashMap慢，因为LinkedHashMap的遍历速度只和实际数据有关，和容量无关，而HashMap的遍历速度和他的容量有关。</p>
+<p>TreeMap实现SortMap接口，能够把它保存的记录根据键排序,默认是按键值的升序排序，也可以指定排序的比较器，当用Iterator 遍历TreeMap时，得到的记录是排过序的。TreeMap不允许键为NULL，允许值为NULL</p>
+<p>一般情况下，我们用的最多的是HashMap,在Map 中插入、删除和定位元素，HashMap 是最好的选择。但如果您要按自然顺序或自定义顺序遍历键，那么TreeMap会更好。如果需要输出的顺序和输入的相同,那么用LinkedHashMap 可以实现,它还可以按读取顺序来排列.</p>
+<p>HashMap是一个最常用的Map，它根据键的hashCode值存储数据，根据键可以直接获取它的值，具有很快的访问速度。HashMap最多只允许一条记录的键为NULL，允许多条记录的值为NULL。</p>
+<p>HashMap不支持线程同步，即任一时刻可以有多个线程同时写HashMap，可能会导致数据的不一致性。如果需要同步，可以用Collections的synchronizedMap方法使HashMap具有同步的能力。</p>
+<p>Hashtable与HashMap类似，不同的是：它不允许记录的键或者值为空；它支持线程的同步，即任一时刻只有一个线程能写Hashtable，因此也导致了Hashtable在写入时会比较慢。</p>
+<p>LinkedHashMap保存了记录的插入顺序，在用Iterator遍历LinkedHashMap时，先得到的记录肯定是先插入的。在遍历的时候会比HashMap慢</p>
+<p>TreeMap能够把它保存的记录根据键排序，默认是按升序排序，也可以指定排序的比较器。当用Iterator遍历TreeMap时，得到的记录是排过序的。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://crazystrome.github.io/2020/10/14/container/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="crazyStrome">
+      <meta itemprop="description" content="啥都写">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="crazyStrome的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/container/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 18:23:20" itemprop="dateCreated datePublished" datetime="2020-10-14T18:23:20+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-04-17 10:06:49" itemprop="dateModified" datetime="2020-04-17T10:06:49+08:00">2020-04-17</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="container"><a href="#container" class="headerlink" title="container"></a>container</h1><p>container包下有三个子包：ring、heap、list，分别代表了环形链表、堆、链表的数据结构实现。</p>
+<h2 id="ring"><a href="#ring" class="headerlink" title="ring"></a>ring</h2>
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://crazystrome.github.io/2020/10/14/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E7%AE%97%E6%B3%95%E9%A2%98LeetCode/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="crazyStrome">
+      <meta itemprop="description" content="啥都写">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="crazyStrome的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E7%AE%97%E6%B3%95%E9%A2%98LeetCode/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 18:23:20" itemprop="dateCreated datePublished" datetime="2020-10-14T18:23:20+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-25 16:06:11" itemprop="dateModified" datetime="2020-03-25T16:06:11+08:00">2020-03-25</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <!-- TOC -->
+
+<ul>
+<li><a href="#%E6%97%A0%E9%87%8D%E5%A4%8D%E5%AD%97%E7%AC%A6%E7%9A%84%E6%9C%80%E9%95%BF%E5%AD%90%E4%B8%B2">无重复字符的最长子串</a></li>
+<li><a href="#%E6%95%B4%E6%95%B0%E5%8F%8D%E8%BD%AC">整数反转</a></li>
+<li><a href="#%E6%9C%80%E9%95%BF%E5%9B%9E%E6%96%87%E5%AD%90%E4%B8%B2">最长回文子串</a></li>
+<li><a href="#%E6%8E%A5%E9%9B%A8%E6%B0%B4">接雨水</a></li>
+<li><a href="#%E5%90%88%E5%B9%B6%E4%B8%A4%E4%B8%AA%E6%9C%89%E5%BA%8F%E9%93%BE%E8%A1%A8">合并两个有序链表</a></li>
+<li><a href="#%E6%9C%80%E5%A4%A7%E8%87%AA%E5%BA%8F%E5%92%8C">最大自序和</a></li>
+<li><a href="#%E4%B8%89%E6%95%B0%E4%B9%8B%E5%92%8C">三数之和</a></li>
+<li><a href="#k%E4%B8%AA%E4%B8%80%E7%BB%84%E5%8F%8D%E8%BD%AC%E9%93%BE%E8%A1%A8">K个一组反转链表</a></li>
+<li><a href="#%E5%90%88%E5%B9%B6%E5%8C%BA%E9%97%B4">合并区间</a></li>
+<li><a href="#%E5%85%A8%E6%8E%92%E5%88%97">全排列</a></li>
+</ul>
+<!-- /TOC -->
+<h1 id="无重复字符的最长子串"><a href="#无重复字符的最长子串" class="headerlink" title="无重复字符的最长子串"></a>无重复字符的最长子串</h1><p>描述：给定一个字符串，找出不含有重复字符的最长子串</p>
+<p>例如：”abcabcbb” 3</p>
+<p>思路：使用滑动窗口，双指针移动，判断right字符是否在窗口，没有就继续，同时更新最大值；有的话就修改left值。</p>
+<p>代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">lengthOfLongestSubstring</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> res <span class="keyword">int</span></span><br><span class="line">    <span class="keyword">var</span> left, right <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line">    s1 := s[left:right]</span><br><span class="line">    <span class="keyword">for</span> ; right &lt; <span class="built_in">len</span>(s); right ++ &#123;</span><br><span class="line">        <span class="keyword">if</span> index := strings.IndexByte(s1, s[right]); index != <span class="number">-1</span> &#123;</span><br><span class="line">            left += index+<span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">        s1 = s[left: right+<span class="number">1</span>]</span><br><span class="line">        <span class="keyword">if</span> res &lt; <span class="built_in">len</span>(s1) &#123;</span><br><span class="line">            res = <span class="built_in">len</span>(s1)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="整数反转"><a href="#整数反转" class="headerlink" title="整数反转"></a>整数反转</h1><p>给出一个32位整数，将其每一位反转，考虑溢出。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">reverse</span><span class="params">(a <span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    y := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> a != <span class="number">0</span> &#123;</span><br><span class="line">        y = y * <span class="number">10</span> + a % <span class="number">10</span></span><br><span class="line">        <span class="keyword">if</span> !(math.MinInt32&lt;= y &amp;&amp; y &lt;= math.MaxInt32) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">        &#125;</span><br><span class="line">        a /= <span class="number">10</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> y</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="最长回文子串"><a href="#最长回文子串" class="headerlink" title="最长回文子串"></a>最长回文子串</h1><p>描述：给定一个字符串，找出最长回文子串。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">longestPalindrome</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(s) &lt; <span class="number">1</span>  &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line">	&#125;</span><br><span class="line">	start, end := <span class="number">0</span>, <span class="number">0</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="built_in">len</span>(s); i++ &#123;</span><br><span class="line">		len1 := expandAroundCenter(s, i, i)</span><br><span class="line">		len2 := expandAroundCenter(s, i, i + <span class="number">1</span>)</span><br><span class="line">		lenn := Max(len1, len2)</span><br><span class="line">		<span class="keyword">if</span> lenn &gt; end - start &#123;</span><br><span class="line">			start = i - (lenn - <span class="number">1</span>) / <span class="number">2</span></span><br><span class="line">			end = i + lenn / <span class="number">2</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> s[start:end + <span class="number">1</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Max</span><span class="params">(x, y <span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> x &gt; y &#123;</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> y</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">expandAroundCenter</span><span class="params">(s <span class="keyword">string</span>, l <span class="keyword">int</span>, r <span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> l &gt;= <span class="number">0</span> &amp;&amp; r &lt; <span class="built_in">len</span>(s) &amp;&amp; s[l] == s[r] &#123;</span><br><span class="line">			l--</span><br><span class="line">			r++</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> r - l - <span class="number">1</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="接雨水"><a href="#接雨水" class="headerlink" title="接雨水"></a>接雨水</h1><p>描述： 给定 <em>n</em> 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。 </p>
+<p><img src="https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/10/22/rainwatertrap.png" alt="img"></p>
+<p>上面是由数组 [0,1,0,2,1,0,1,3,2,1,2,1] 表示的高度图，在这种情况下，可以接 6 个单位的雨水（蓝色部分表示雨水）。</p>
+<p>代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">trap</span><span class="params">(height []<span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    leftMax := <span class="built_in">make</span>([]<span class="keyword">int</span>, <span class="built_in">len</span>(height))</span><br><span class="line">    rightMax := <span class="built_in">make</span>([]<span class="keyword">int</span>, <span class="built_in">len</span>(height))</span><br><span class="line">    left, right := <span class="number">0</span>, <span class="built_in">len</span>(height)<span class="number">-1</span></span><br><span class="line">    <span class="keyword">for</span> left &lt; <span class="built_in">len</span>(height) &amp;&amp; right &gt;= <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> right == <span class="built_in">len</span>(height)<span class="number">-1</span> &#123;</span><br><span class="line">            rightMax[right] = <span class="number">0</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            rightMax[right] = max(rightMax[right+<span class="number">1</span>], height[right+<span class="number">1</span>])</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> left == <span class="number">0</span> &#123;</span><br><span class="line">            leftMax[left] = <span class="number">0</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            leftMax[left] = max(leftMax[left<span class="number">-1</span>], height[left<span class="number">-1</span>])</span><br><span class="line">        &#125;</span><br><span class="line">        left ++</span><br><span class="line">        right --</span><br><span class="line">    &#125;</span><br><span class="line">    fmt.Println(leftMax)</span><br><span class="line">    fmt.Println(rightMax)</span><br><span class="line">    sum := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="built_in">len</span>(height); i ++ &#123;</span><br><span class="line">        top := min(leftMax[i], rightMax[i])</span><br><span class="line">        <span class="keyword">if</span> top &gt;= height[i] &#123;</span><br><span class="line">            sum = sum + top - height[i]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">return</span> sum</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">max</span><span class="params">(a, b <span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> a &gt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> b</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">min</span><span class="params">(a, b <span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> a + b - max(a, b)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="合并两个有序链表"><a href="#合并两个有序链表" class="headerlink" title="合并两个有序链表"></a>合并两个有序链表</h1><p>将两个有序链表合并为一个新的链表</p>
+<p>代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">mergeTwoLists</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> l2</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> l2 == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> l1</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> n *ListNode</span><br><span class="line">    <span class="keyword">if</span> l1.Val &gt; l2.Val &#123;</span><br><span class="line">        n = l2.Next</span><br><span class="line">        l2.Next = mergeTwoLists(l1, n)</span><br><span class="line">        <span class="keyword">return</span> l2</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        n = l1.Next</span><br><span class="line">        l1.Next = mergeTwoLists(n, l2)</span><br><span class="line">        <span class="keyword">return</span> l1</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="最大自序和"><a href="#最大自序和" class="headerlink" title="最大自序和"></a>最大自序和</h1><p>描述：给定一个数组nums，找到具有最大子序和的连续子数组，返回最大和。</p>
+<p>思路：使用动态规划，一样大的dp数组，dp[i]表示截止到当前位置且包括的连续最大子序和，<code>dp[i]=max(dp[i-1]+nums[i], nums[i])</code></p>
+<p>代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">maxSubArray</span><span class="params">(nums []<span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(nums) == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">    dp := <span class="built_in">make</span>([]<span class="keyword">int</span>, <span class="built_in">len</span>(nums))</span><br><span class="line">    dp[<span class="number">0</span>] = nums[<span class="number">0</span>]</span><br><span class="line">    res := nums[<span class="number">0</span>]</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">1</span>; i &lt; <span class="built_in">len</span>(nums); i ++ &#123;</span><br><span class="line">        dp[i] = max(nums[i], nums[i]+dp[i<span class="number">-1</span>])</span><br><span class="line">        res = max(dp[i], res)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">max</span><span class="params">(a, b <span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> a &gt; b &#123;</span><br><span class="line">        <span class="keyword">return</span> a</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> b</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="三数之和"><a href="#三数之和" class="headerlink" title="三数之和"></a>三数之和</h1><p>描述：给你一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？请你找出所有满足条件且不重复的三元组。</p>
+<p>代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">threeSum</span><span class="params">(nums []<span class="keyword">int</span>)</span> [][]<span class="title">int</span></span> &#123;</span><br><span class="line">	answer := [][]<span class="keyword">int</span>&#123;&#125;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(nums) &lt; <span class="number">3</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> answer</span><br><span class="line">	&#125;</span><br><span class="line">	sort.Ints(nums)</span><br><span class="line">	<span class="keyword">for</span> index, elem := <span class="keyword">range</span> nums&#123;</span><br><span class="line">		<span class="keyword">if</span> elem &gt; <span class="number">0</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> answer</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> index &gt; <span class="number">0</span>&#123;</span><br><span class="line">			<span class="keyword">if</span> elem == nums[index - <span class="number">1</span>]&#123;</span><br><span class="line">				<span class="keyword">continue</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		L := index + <span class="number">1</span></span><br><span class="line">		R := <span class="built_in">len</span>(nums) - <span class="number">1</span></span><br><span class="line">		<span class="keyword">for</span> L &lt; R &#123;</span><br><span class="line">			<span class="keyword">if</span> elem + nums[L] + nums[R] == <span class="number">0</span>&#123;</span><br><span class="line">				answer = <span class="built_in">append</span>(answer, <span class="built_in">append</span>([]<span class="keyword">int</span>&#123;&#125;, elem, nums[L], nums[R]))</span><br><span class="line">				<span class="keyword">for</span>  L &lt; R &amp;&amp; nums[L] == nums[L+<span class="number">1</span>]&#123;</span><br><span class="line">					L += <span class="number">1</span></span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">for</span> L &lt; R &amp;&amp; nums[R] == nums[R<span class="number">-1</span>]&#123;</span><br><span class="line">					R -= <span class="number">1</span></span><br><span class="line">				&#125;</span><br><span class="line">				L += <span class="number">1</span></span><br><span class="line">				R -= <span class="number">1</span></span><br><span class="line">			&#125; <span class="keyword">else</span> <span class="keyword">if</span> elem + nums[L] + nums[R] &gt; <span class="number">0</span>&#123;</span><br><span class="line">				R -= <span class="number">1</span></span><br><span class="line">			&#125; <span class="keyword">else</span> <span class="keyword">if</span> elem + nums[L] + nums[R] &lt; <span class="number">0</span>&#123;</span><br><span class="line">				L += <span class="number">1</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> answer</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="K个一组反转链表"><a href="#K个一组反转链表" class="headerlink" title="K个一组反转链表"></a>K个一组反转链表</h1><p>描述：给你一个链表，每 k 个节点一组进行翻转，请你返回翻转后的链表。k 是一个正整数，它的值小于或等于链表的长度。如果节点总数不是 k 的整数倍，那么请将最后剩余的节点保持原有顺序。</p>
+<p>示例：</p>
+<p>给你这个链表：1-&gt;2-&gt;3-&gt;4-&gt;5</p>
+<p>当 k = 2 时，应当返回: 2-&gt;1-&gt;4-&gt;3-&gt;5</p>
+<p>当 k = 3 时，应当返回: 3-&gt;2-&gt;1-&gt;4-&gt;5</p>
+<p>思路：使用递归的方式，每次只找到K的链表，把他和后序链表分割开，然后反转，原来的头结点变成尾结点，这样原来的head后面直接挂递归后序结点返回的值。</p>
+<p>代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Definition for singly-linked list.</span></span><br><span class="line"><span class="comment"> * type ListNode struct &#123;</span></span><br><span class="line"><span class="comment"> *     Val int</span></span><br><span class="line"><span class="comment"> *     Next *ListNode</span></span><br><span class="line"><span class="comment"> * &#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">reverseKGroup</span><span class="params">(head *ListNode, k <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    j := k</span><br><span class="line">    tmp := head</span><br><span class="line">    <span class="keyword">for</span> k &gt; <span class="number">1</span> &amp;&amp; tmp != <span class="literal">nil</span> &#123;</span><br><span class="line">        tmp = tmp.Next</span><br><span class="line">        k --</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> tmp == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> head</span><br><span class="line">    &#125;</span><br><span class="line">    n := tmp.Next</span><br><span class="line">    tmp.Next = <span class="literal">nil</span></span><br><span class="line">    child := reverseKGroup(n, j)</span><br><span class="line">    reverse(head)</span><br><span class="line">    head.Next = child</span><br><span class="line">    <span class="keyword">return</span> tmp</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">reverse</span><span class="params">(root *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> pre, next *ListNode</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> root != <span class="literal">nil</span> &#123;</span><br><span class="line">        next = root.Next</span><br><span class="line">        root.Next = pre</span><br><span class="line">        pre = root</span><br><span class="line">        root = next</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> pre</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="合并区间"><a href="#合并区间" class="headerlink" title="合并区间"></a>合并区间</h1><p>描述：给出一个区间的集合，请合并所有重叠的区间。</p>
+<p>例如：</p>
+<p>输入: [[1,3],[2,6],[8,10],[15,18]]<br>输出: [[1,6],[8,10],[15,18]]<br>解释: 区间 [1,3] 和 [2,6] 重叠, 将它们合并为 [1,6].</p>
+<p>思路：先按照左区间进行排序，然后依次判断区间重叠，如果重叠，根据重叠类型进行合并。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">merge</span><span class="params">(intervals [][]<span class="keyword">int</span>)</span> [][]<span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(intervals) &lt;= <span class="number">1</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> intervals</span><br><span class="line">    &#125;</span><br><span class="line">    sort.Sort(Inters(intervals))</span><br><span class="line">    res := [][]<span class="keyword">int</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> _, in := <span class="keyword">range</span> intervals &#123;</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(res) == <span class="number">0</span> &#123;</span><br><span class="line">            res = <span class="built_in">append</span>(res, in)</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        &#125;</span><br><span class="line">        l := <span class="built_in">len</span>(res)</span><br><span class="line">        <span class="keyword">if</span> in[<span class="number">0</span>] &lt;= res[l<span class="number">-1</span>][<span class="number">1</span>] &#123;</span><br><span class="line">            <span class="keyword">if</span> in[<span class="number">1</span>] &lt;= res[l<span class="number">-1</span>][<span class="number">1</span>] &#123;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                res = <span class="built_in">append</span>(res[:l<span class="number">-1</span>], []<span class="keyword">int</span>&#123;res[l<span class="number">-1</span>][<span class="number">0</span>], in[<span class="number">1</span>]&#125;)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            res = <span class="built_in">append</span>(res, in)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> Inters [][]<span class="keyword">int</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(is Inters)</span> <span class="title">Swap</span><span class="params">(i, j <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">    is[i], is[j] = is[j], is[i]</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(is Inters)</span> <span class="title">Less</span><span class="params">(i, j <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> is[i][<span class="number">0</span>] &lt; is[j][<span class="number">0</span>]</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(is Inters)</span> <span class="title">Len</span><span class="params">()</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">len</span>(is)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="全排列"><a href="#全排列" class="headerlink" title="全排列"></a>全排列</h1><p>给定一个 没有重复 数字的序列，返回其所有可能的全排列。</p>
+<p>示例:</p>
+<p>输入: [1,2,3]<br>输出:<br>[<br>  [1,2,3],<br>  [1,3,2],<br>  [2,1,3],<br>  [2,3,1],<br>  [3,1,2],<br>  [3,2,1]<br>]</p>
+<p>思路：使用广度优先算法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">permute</span><span class="params">(nums []<span class="keyword">int</span>)</span> [][]<span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(nums) == <span class="number">1</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> [][]<span class="keyword">int</span>&#123;&#123;nums[<span class="number">0</span>]&#125;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    result := [][]<span class="keyword">int</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> index, value := <span class="keyword">range</span> nums &#123;</span><br><span class="line">        <span class="keyword">var</span> numsCopy = <span class="built_in">make</span>([]<span class="keyword">int</span>, <span class="built_in">len</span>(nums))</span><br><span class="line">        <span class="built_in">copy</span>(numsCopy, nums)</span><br><span class="line">        numsSubOne := <span class="built_in">append</span>(numsCopy[:index],numsCopy[index+<span class="number">1</span>:]...)</span><br><span class="line">        valueSlice := []<span class="keyword">int</span>&#123;value&#125;</span><br><span class="line">        newSubSlice := permute(numsSubOne)</span><br><span class="line">        <span class="keyword">for</span> _, newValue := <span class="keyword">range</span> newSubSlice &#123;</span><br><span class="line">            result = <span class="built_in">append</span>(result, <span class="built_in">append</span>(valueSlice, newValue...))</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://crazystrome.github.io/2020/10/14/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E8%BF%90%E8%BE%93%E5%B1%82/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="crazyStrome">
+      <meta itemprop="description" content="啥都写">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="crazyStrome的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E8%BF%90%E8%BE%93%E5%B1%82/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 18:23:20" itemprop="dateCreated datePublished" datetime="2020-10-14T18:23:20+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-25 16:01:17" itemprop="dateModified" datetime="2020-03-25T16:01:17+08:00">2020-03-25</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <!-- TOC -->
+
+<ul>
+<li><a href="#1-%E8%BF%90%E8%BE%93%E5%B1%82">1. 运输层</a><ul>
+<li><a href="#11-%E6%A6%82%E8%BF%B0%E5%92%8C%E8%BF%90%E8%BE%93%E5%B1%82%E6%9C%8D%E5%8A%A1">1.1. 概述和运输层服务</a><ul>
+<li><a href="#111-%E8%BF%90%E8%BE%93%E5%B1%82%E5%92%8C%E7%BD%91%E7%BB%9C%E5%B1%82%E7%9A%84%E5%85%B3%E7%B3%BB">1.1.1. 运输层和网络层的关系</a></li>
+<li><a href="#112-%E5%9B%A0%E7%89%B9%E7%BD%91%E8%BF%90%E8%BE%93%E5%B1%82%E6%A6%82%E8%BF%B0">1.1.2. 因特网运输层概述</a></li>
+</ul>
+</li>
+<li><a href="#12-%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E5%92%8C%E5%A4%9A%E8%B7%AF%E5%88%86%E8%A7%A3">1.2. 多路复用和多路分解</a></li>
+<li><a href="#13-%E6%97%A0%E8%BF%9E%E6%8E%A5%E8%BF%90%E8%BE%93udp">1.3. 无连接运输：UDP</a><ul>
+<li><a href="#131-udp%E6%8A%A5%E6%96%87%E6%AE%B5%E7%BB%93%E6%9E%84">1.3.1. UDP报文段结构</a></li>
+<li><a href="#132-udp%E6%A0%A1%E9%AA%8C%E5%92%8C">1.3.2. UDP校验和</a></li>
+</ul>
+</li>
+<li><a href="#14-%E5%8F%AF%E9%9D%A0%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93%E7%9A%84%E5%8E%9F%E7%90%86">1.4. 可靠数据传输的原理</a><ul>
+<li><a href="#141-%E6%9E%84%E9%80%A0%E5%8F%AF%E9%9D%A0%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93%E5%8D%8F%E8%AE%AE">1.4.1. 构造可靠数据传输协议</a></li>
+<li><a href="#142-%E5%9B%9E%E9%80%80n%E6%AD%A5-%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3%E5%8D%8F%E8%AE%AE">1.4.2. 回退N步-滑动窗口协议</a></li>
+</ul>
+</li>
+<li><a href="#15-%E9%9D%A2%E5%90%91%E8%BF%9E%E6%8E%A5%E7%9A%84%E8%BF%90%E8%BE%93tcp">1.5. 面向连接的运输：TCP</a><ul>
+<li><a href="#151-tcp%E6%8A%A5%E6%96%87%E6%AE%B5%E7%BB%93%E6%9E%84">1.5.1. TCP报文段结构</a><ul>
+<li><a href="#1511-%E7%A1%AE%E8%AE%A4%E5%8F%B7%E5%92%8C%E5%BA%8F%E5%8F%B7">1.5.1.1. 确认号和序号</a></li>
+</ul>
+</li>
+<li><a href="#152-%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6">1.5.2. 流量控制</a></li>
+<li><a href="#153-tcp%E8%BF%9E%E6%8E%A5%E7%AE%A1%E7%90%86">1.5.3. TCP连接管理</a></li>
+<li><a href="#154-syn%E6%B4%AA%E6%B3%9B%E6%94%BB%E5%87%BB">1.5.4. SYN洪泛攻击</a></li>
+</ul>
+</li>
+<li><a href="#16-%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6%E5%8E%9F%E7%90%86">1.6. 拥塞控制原理</a><ul>
+<li><a href="#161-%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6%E6%96%B9%E6%B3%95">1.6.1. 拥塞控制方法</a></li>
+</ul>
+</li>
+<li><a href="#17-tcp%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6">1.7. TCP拥塞控制</a><ul>
+<li><a href="#171-%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6%E7%AE%97%E6%B3%95">1.7.1. 拥塞控制算法</a><ul>
+<li><a href="#1711-%E5%8A%A0%E6%80%A7%E5%A2%9E%E4%B9%98%E6%80%A7%E5%87%8F">1.7.1.1. 加性增、乘性减</a></li>
+<li><a href="#1712-%E6%85%A2%E5%90%AF%E5%8A%A8">1.7.1.2. 慢启动</a></li>
+<li><a href="#1713-%E5%AF%B9%E8%B6%85%E6%97%B6%E6%97%B6%E9%97%B4%E5%81%9A%E5%87%BA%E5%8F%8D%E5%BA%94">1.7.1.3. 对超时时间做出反应</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- /TOC -->
+<h1 id="1-运输层"><a href="#1-运输层" class="headerlink" title="1. 运输层"></a>1. 运输层</h1><p>运输层位于应用层和网络层之间，是分层的网络体系结构的重要部分。该层为运行在不同主机上的应用程序提供直接的通信服务起着至关重要的作用。</p>
+<h2 id="1-1-概述和运输层服务"><a href="#1-1-概述和运输层服务" class="headerlink" title="1.1. 概述和运输层服务"></a>1.1. 概述和运输层服务</h2><p>运输层协议为运行在不同主机上的应用程序之间提供了==逻辑通道==。</p>
+<img src="https://i.loli.net/2020/03/22/ijCPRYbwfqZ6WDu.png" alt="image-20200322184625350" style="zoom:150%;" />
+
+<p>由上图可见，运输层协议是在端系统中而不是网络路由器中实现的。在发送方，运输层将接收到的来自发送应用进程的报文转换成运输层分组，称其为<strong>运输层报文段</strong>。</p>
+<p>网络路由器仅作用于该数据报的网络层字段，即他们不检查封装在该数据报的运输层报文段的字段。</p>
+<h3 id="1-1-1-运输层和网络层的关系"><a href="#1-1-1-运输层和网络层的关系" class="headerlink" title="1.1.1. 运输层和网络层的关系"></a>1.1.1. 运输层和网络层的关系</h3><p>运输层为运行在不同主机上的进程提供逻辑通信，而网络层提供了主机之间的逻辑通信。</p>
+<h3 id="1-1-2-因特网运输层概述"><a href="#1-1-2-因特网运输层概述" class="headerlink" title="1.1.2. 因特网运输层概述"></a>1.1.2. 因特网运输层概述</h3><p>在与因特网相关的环境中，将运输层报文段称为报文段。然而，在因特网的文献中，将TCP的运输层分组称为报文段，而将UDP的运输层分组称为数据报。</p>
+<p>因特网网络层协议有一个名字叫IP，全称是网际协议。IP为主机之间提供逻辑通信。IP的服务模型是尽力而为交付服务。这意味着IP不确保报文段的交付，不保证报文段的按序交付，更不保证报文段的数据完整性。由于这些原因，IP被称为不可靠服务。</p>
+<p>将主机间交付扩展到进程间交付，称为运输层的多路复用和多路分解。UDP和TCP还可以通过在其报文段的首部中添加差错检测字段而提供完整性检查。</p>
+<p>TCP提供可靠数据传输服务，拥塞控制。</p>
+<h2 id="1-2-多路复用和多路分解"><a href="#1-2-多路复用和多路分解" class="headerlink" title="1.2. 多路复用和多路分解"></a>1.2. 多路复用和多路分解</h2><p>多路复用和多路分解，就是讲网络层提供的主机到主机交付服务扩展到为在主机上运行的应用程序所提供的进程到进程交付服务。</p>
+<p>进程有一个或多个套接字，它相当于从网络向进程传递数据和从进程向网络传递数据的门户。</p>
+<p>将运输层报文段中的数据交付到正确的套接字的工作成为**==多路分解==<strong>。从源主机的不同套接字中收集数据块，并位每个数据块封装上首部信息从而生成报文段，然后将报文传递到网络层的工作是</strong>==多路复用==**。</p>
+<p>运输层多路复用的要求：</p>
+<ol>
+<li>套接字有唯一标识符</li>
+<li>每个报文段有特殊字符来指示该报文段要交付的套接字</li>
+</ol>
+<p>这些特殊字段是==源端口号==和==目的端口号==字段。0~1023范围的端口号称为==周知端口号==是受严格控制的。</p>
+<p>一个UDP套接字是由一个包含目的IP地址和目的端口号的二元组来全面表示的。</p>
+<p>TCP套接字是由一个四元组（源IP地址，源端口号、目的IP地址、目的端口号）来标识的。</p>
+<h2 id="1-3-无连接运输：UDP"><a href="#1-3-无连接运输：UDP" class="headerlink" title="1.3. 无连接运输：UDP"></a>1.3. 无连接运输：UDP</h2><p>使用UDP时，在发送报文段之前，发送方和接收方的运输层实体之间没有进行握手，所以说UDP是*==无连接的==*。</p>
+<p>很多应用更适合用UDP：</p>
+<ol>
+<li>应用层能更好地控制要发送的数据和发送时间。</li>
+<li>无需建立连接，所以相比TCP要快速。</li>
+<li>无连接状态。TCP需要在端系统中维护连接状态，而UDP不用。</li>
+<li>分组首部开销小。TCP都有20字节的首部开销，UDP只有8字节的开销。</li>
+</ol>
+<p>使用UDP的应用是可以实现可靠数据传输的，这可以在应用程序自身中建立可靠性机制来完成（例如，增加确认与重传机制）。</p>
+<h3 id="1-3-1-UDP报文段结构"><a href="#1-3-1-UDP报文段结构" class="headerlink" title="1.3.1. UDP报文段结构"></a>1.3.1. UDP报文段结构</h3><p><img src="https://i.loli.net/2020/03/22/icVonWNX3rQgqAh.png" alt="image-20200322192841115"></p>
+<p>UDP首部只有4个字段，每个字段由两个字节组成。</p>
+<p>长度字段指明了包括首部在内的UDP报文长度。</p>
+<h3 id="1-3-2-UDP校验和"><a href="#1-3-2-UDP校验和" class="headerlink" title="1.3.2. UDP校验和"></a>1.3.2. UDP校验和</h3><p>假设要传输三个16位字，则将3个16位字依次相加，如果有加法溢出，则回卷。校验和就是求得和的反码运算结果。在接收方，全部的4个16位字（包括校验和）一起相加。如果分组无差错，则接收方的和将是1111111111111111。如果有一个比特是0，则分组出现差错。</p>
+<h2 id="1-4-可靠数据传输的原理"><a href="#1-4-可靠数据传输的原理" class="headerlink" title="1.4. 可靠数据传输的原理"></a>1.4. 可靠数据传输的原理</h2><h3 id="1-4-1-构造可靠数据传输协议"><a href="#1-4-1-构造可靠数据传输协议" class="headerlink" title="1.4.1. 构造可靠数据传输协议"></a>1.4.1. 构造可靠数据传输协议</h3><p>基于重传机制的可靠数据传输协议称为自动重传请求（ARQ）协议，ARQ协议还需要另外三种协议来处理存在的比特差错：</p>
+<ul>
+<li>差错协议。</li>
+<li>接收方反馈。</li>
+<li>重传。接收方收到有差错的分组时，发送方将重传该分组。</li>
+</ul>
+<h3 id="1-4-2-回退N步-滑动窗口协议"><a href="#1-4-2-回退N步-滑动窗口协议" class="headerlink" title="1.4.2. 回退N步-滑动窗口协议"></a>1.4.2. 回退N步-滑动窗口协议</h3><p><img src="https://i.loli.net/2020/03/22/1irKRcDbV8kNLsj.png" alt="image-20200322200425293"></p>
+<p>在发送方的发送缓冲区中，存在着四种报文段类型：</p>
+<ul>
+<li>已经发送并且确认的</li>
+<li>已经发送等待确认的</li>
+<li>未发送但是可以等待发送的</li>
+<li>未发送但是不可以发送的</li>
+</ul>
+<p>该窗口中就包括了已经发送等待确认的以及未发送但是等待发送的报文段。</p>
+<h2 id="1-5-面向连接的运输：TCP"><a href="#1-5-面向连接的运输：TCP" class="headerlink" title="1.5. 面向连接的运输：TCP"></a>1.5. 面向连接的运输：TCP</h2><p>TCP提供的是全双工的服务，是点对点的。</p>
+<p><img src="https://i.loli.net/2020/03/22/eZj4HwT8GFP2O6m.png" alt="image-20200322200929088"></p>
+<p>如上图所示，TCP将这些数据引导到该连接的==发送缓存==里，发送缓存是三次握手初期设置的缓存之一。</p>
+<p>TCP可从缓存中取出并放入报文段中的数据量受限于==最大报文段长==（MSS）。MSS通常根据最初确定的最大链路层帧长度来设置，本地发送主机发送长度是这样的帧，即所谓==最大传输单元（maximum transmission unit，MTU）==。MSS是指报文段里应用层数据的最大长度，而不是指包括TCP首部的TCP报文段的最大长度。</p>
+<p>TCP连接的组成包括：一台主机上的缓存、变量和与一个进程连接的套接字，以及另一个主机上的一套缓存、变量和一个进程连接的套接字。</p>
+<h3 id="1-5-1-TCP报文段结构"><a href="#1-5-1-TCP报文段结构" class="headerlink" title="1.5.1. TCP报文段结构"></a>1.5.1. TCP报文段结构</h3><p><img src="https://i.loli.net/2020/03/22/ACq1aEPgj2eOzsm.png" alt="image-20200322201538519"></p>
+<p>和UDP一样，首部包括源端口号和目的端口号，它用于多路复用和多路分解来自或送至上层应用的数据。TCP也包括校验和字段。还有：</p>
+<ul>
+<li>32比特的==序号==字段和32比特的==确认号==字段。</li>
+<li>16比特的==接收窗口==字段。</li>
+<li>4比特的==首部长度==字段。</li>
+<li>可选与变长的==选项字段==。</li>
+<li>6比特的==标志==字段。ACK用来指示确认字段中的值是有效的。RST、SYN和FIN比特用于连接建立和拆除。当PSH字段被设置时，就表示接收方应立即将数据交给上层。URG比特用来指示报文里存放着被发送方上层实体置为“紧急的数据”。</li>
+</ul>
+<h4 id="1-5-1-1-确认号和序号"><a href="#1-5-1-1-确认号和序号" class="headerlink" title="1.5.1.1. 确认号和序号"></a>1.5.1.1. 确认号和序号</h4><p>TCP把数据看成一个无结构的但是有序的字节流。序号建立在传送的字节流之上，而不是建立在传送的报文段的序列之上。一个==报文段的序号==因此是该报文段首字节的字节流编号。</p>
+<p>TCP只确认数据流中至第一个丢失字节位置的字节，所以TCP也被称为是提供==累计确认==。</p>
+<p>一条TCP连接的双方均可以随机地选择初始序号。这样做可以减少那些仍在网络中的两台主机之间先前已终止的连接的报文段，误以为是后来这两台主机之间新建连接所产生的有效报文段的可能性。</p>
+<h3 id="1-5-2-流量控制"><a href="#1-5-2-流量控制" class="headerlink" title="1.5.2. 流量控制"></a>1.5.2. 流量控制</h3><p>TCP提供流量控制服务和拥塞控制。</p>
+<p>TCP让发送方维护一个==接收窗口==的变量来提供流量控制。</p>
+<h3 id="1-5-3-TCP连接管理"><a href="#1-5-3-TCP连接管理" class="headerlink" title="1.5.3. TCP连接管理"></a>1.5.3. TCP连接管理</h3><p>TCP客户端向服务器发起请求的过程：</p>
+<ol>
+<li>客户机端的TCP首先向服务器端的TCP发送一个特殊的TCP报文段。该报文段中不包括应用层数据，但是报文段的首部中的一个标志位被置为1。因此，这个特殊报文被称为SYN报文段。另外，客户机会选择一个起始序号（client_isn），并将其放置到该起始的TCP SYN报文段的序号字段中。该报文段会被封装在一个IP数据报中，并发给服务器。</li>
+<li>一旦TCP SYN报文段的IP数据报到达服务器主机，服务器会从该数据报中提取TCP SYN报文段，为该TCP连接分配TCP缓存和变量，并向客户机发送允许连接的报文段。这个允许连接的报文段也不包括应用层数据。但是在首部中，SYN比特被置为1，该TCP报文段首部的确认号字段被置为client_isn+1。最后服务器选择自己的起始序号(server_isn)，并将其放置到TCP报文段首部的序号字段中。该允许连接的报文有时也称为SYNACK报文段。</li>
+<li>在收到SYNACK报文段之后，客户机也要分配缓存和变量。客户机主机还会想服务器发送另外一个报文段，这个报文段对服务器允许连接的报文段进行了确认（客户通过将值server_isn+1放置到TCP报文段首部的确认字段中来完成此项工作）。因为连接已经被建立，所以该SYN比特被置为0。</li>
+</ol>
+<h3 id="1-5-4-SYN洪泛攻击"><a href="#1-5-4-SYN洪泛攻击" class="headerlink" title="1.5.4. SYN洪泛攻击"></a>1.5.4. SYN洪泛攻击</h3><p>在三次握手中，服务器为了响应一个SYN请求，会给该请求分配缓存和相关变量。那么如果攻击者不完成三次握手的第三步，从不同的源向服务器发送SYN请求。服务器不断为这些半开的连接分配资源，导致服务器资源迅速消耗殆尽。</p>
+<p>可以使用SYN cookie防御：</p>
+<ul>
+<li>当服务器收到SYN报文段时，并不会为给报文生成一个半开的连接，即分配缓存和变量。服务器会生成一个初始序列号，该序列号是SYN报文段的源和目的IP地址、端口号以及仅被服务器所知的秘密数的一个复杂函数生成的。这个初始序列号被称为“cookie”。</li>
+<li>如果客户是合法的，他将返回一个ACK报文段。服务器收到ACK并进行验证。通过使用ACK报文中的相同字段和秘密数运行相同的函数，如果该结果加1和确认号相同的话，就认为是合法的，服务器建立一个全开的连接。</li>
+<li>另一方面，如果客户端没有返回，服务器就不为它分配资源。</li>
+</ul>
+<h2 id="1-6-拥塞控制原理"><a href="#1-6-拥塞控制原理" class="headerlink" title="1.6. 拥塞控制原理"></a>1.6. 拥塞控制原理</h2><h3 id="1-6-1-拥塞控制方法"><a href="#1-6-1-拥塞控制方法" class="headerlink" title="1.6.1. 拥塞控制方法"></a>1.6.1. 拥塞控制方法</h3><p>根据网络层是否为运输层拥塞控制提供了显示的帮助来区分网络拥塞控制算法：</p>
+<ul>
+<li>端到端拥塞控制</li>
+<li>网络辅助的拥塞控制</li>
+</ul>
+<h2 id="1-7-TCP拥塞控制"><a href="#1-7-TCP拥塞控制" class="headerlink" title="1.7. TCP拥塞控制"></a>1.7. TCP拥塞控制</h2><p>TCP采用的方法是让每一个发送方根据感知到的网络拥塞的程度，来限制其能向连接发送流量的速率。</p>
+<p>TCP连接的每一端都由一个接收缓存、一个发送缓存和几个变量组成。TCP拥塞控制机制让连接的每一端都记录一个额外的变量，即==拥塞窗口==。拥塞窗口表示为CongWin，它对一个TCP发送方能向网络中发送的速率进行了限制。特别是在发送方中未被确认的数据量不会超过CongWin和RcvWindow的最小值。</p>
+<p>发送方的发送速率大概是CongWin/RTT 字节/秒。通过调节CongWin的值，发送方就能调整它向连接中发送数据的速率。</p>
+<p>TCP发送方的丢包事件：要么出现超时，要么收到来自接收方的3个冗余的ACK。</p>
+<h3 id="1-7-1-拥塞控制算法"><a href="#1-7-1-拥塞控制算法" class="headerlink" title="1.7.1. 拥塞控制算法"></a>1.7.1. 拥塞控制算法</h3><h4 id="1-7-1-1-加性增、乘性减"><a href="#1-7-1-1-加性增、乘性减" class="headerlink" title="1.7.1.1. 加性增、乘性减"></a>1.7.1.1. 加性增、乘性减</h4><p>当检测到一个丢包事件，把CongWin减半，最低为一个MSS。</p>
+<p>当网络无阻塞时，每收到一个确认号就把CongWin增加一个MSS。</p>
+<p>TCP拥塞控制协议的线性增长阶段被称为==拥塞避免==。</p>
+<h4 id="1-7-1-2-慢启动"><a href="#1-7-1-2-慢启动" class="headerlink" title="1.7.1.2. 慢启动"></a>1.7.1.2. 慢启动</h4><p>CongWin在一开始是一个MSS。在这个==慢启动==阶段，TCP发送方以指数级增长发送速率直到丢包发生。</p>
+<h4 id="1-7-1-3-对超时时间做出反应"><a href="#1-7-1-3-对超时时间做出反应" class="headerlink" title="1.7.1.3. 对超时时间做出反应"></a>1.7.1.3. 对超时时间做出反应</h4><p>TCP通过维持一个阈值来确定慢启动将结束并且拥塞避免将开始的窗口长度。阈值一开始很大，每当发生一次丢包事件，阈值就会设置为当前CongWin的一半。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://crazystrome.github.io/2020/10/14/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E5%BA%94%E7%94%A8%E5%B1%82/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="crazyStrome">
+      <meta itemprop="description" content="啥都写">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="crazyStrome的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E5%BA%94%E7%94%A8%E5%B1%82/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 18:23:20" itemprop="dateCreated datePublished" datetime="2020-10-14T18:23:20+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-25 16:01:00" itemprop="dateModified" datetime="2020-03-25T16:01:00+08:00">2020-03-25</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <!-- TOC -->
+
+<ul>
+<li><a href="#1-%E5%BA%94%E7%94%A8%E5%B1%82">1. 应用层</a><ul>
+<li><a href="#11-%E5%BA%94%E7%94%A8%E5%B1%82%E5%8D%8F%E8%AE%AE%E5%8E%9F%E7%90%86">1.1. 应用层协议原理</a><ul>
+<li><a href="#111-%E7%BD%91%E7%BB%9C%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84">1.1.1. 网络应用程序体系结构</a></li>
+<li><a href="#112-%E5%9B%A0%E7%89%B9%E7%BD%91%E6%8F%90%E4%BE%9B%E7%9A%84%E8%BF%90%E8%BE%93%E6%9C%8D%E5%8A%A1">1.1.2. 因特网提供的运输服务</a><ul>
+<li><a href="#1121-tcp%E6%9C%8D%E5%8A%A1">1.1.2.1. TCP服务</a></li>
+<li><a href="#1122-udp%E6%9C%8D%E5%8A%A1">1.1.2.2. UDP服务</a></li>
+<li><a href="#1123-%E8%BF%9B%E7%A8%8B%E5%AF%BB%E5%9D%80">1.1.2.3. 进程寻址</a></li>
+</ul>
+</li>
+<li><a href="#113-%E5%BA%94%E7%94%A8%E5%B1%82%E5%8D%8F%E8%AE%AE">1.1.3. 应用层协议</a></li>
+</ul>
+</li>
+<li><a href="#12-web%E5%BA%94%E7%94%A8%E5%92%8Chttp%E5%8D%8F%E8%AE%AE">1.2. Web应用和HTTP协议</a><ul>
+<li><a href="#121-%E9%9D%9E%E6%8C%81%E4%B9%85%E8%BF%9E%E6%8E%A5%E5%92%8C%E6%8C%81%E4%B9%85%E8%BF%9E%E6%8E%A5">1.2.1. 非持久连接和持久连接</a></li>
+<li><a href="#122-http%E6%8A%A5%E6%96%87%E6%A0%BC%E5%BC%8F">1.2.2. HTTP报文格式</a><ul>
+<li><a href="#1221-http%E8%AF%B7%E6%B1%82%E6%8A%A5%E6%96%87">1.2.2.1. HTTP请求报文</a></li>
+<li><a href="#1222-http%E5%93%8D%E5%BA%94%E6%8A%A5%E6%96%87">1.2.2.2. HTTP响应报文</a></li>
+</ul>
+</li>
+<li><a href="#123-cookie">1.2.3. cookie</a></li>
+<li><a href="#124-web%E7%BC%93%E5%AD%98">1.2.4. Web缓存</a></li>
+<li><a href="#125-%E6%9D%A1%E4%BB%B6get%E6%96%B9%E6%B3%95">1.2.5. 条件GET方法</a></li>
+</ul>
+</li>
+<li><a href="#13-%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93%E5%8D%8F%E8%AE%AEftp">1.3. 文件传输协议：FTP</a></li>
+<li><a href="#14-%E5%9B%A0%E7%89%B9%E7%BD%91%E4%B8%AD%E7%9A%84%E7%94%B5%E5%AD%90%E9%82%AE%E4%BB%B6">1.4. 因特网中的电子邮件</a><ul>
+<li><a href="#141-smtp">1.4.1. SMTP</a></li>
+<li><a href="#142-%E4%B8%8Ehttp%E7%9A%84%E5%AF%B9%E6%AF%94">1.4.2. 与HTTP的对比</a></li>
+<li><a href="#143-%E9%82%AE%E4%BB%B6%E6%8A%A5%E6%96%87%E6%A0%BC%E5%BC%8F%E5%92%8Cmime">1.4.3. 邮件报文格式和MIME</a></li>
+<li><a href="#144-%E9%82%AE%E4%BB%B6%E8%AE%BF%E9%97%AE%E5%8D%8F%E8%AE%AE">1.4.4. 邮件访问协议</a></li>
+</ul>
+</li>
+<li><a href="#15-dns%E5%9B%A0%E7%89%B9%E7%BD%91%E7%9A%84%E7%9B%AE%E5%BD%95%E6%9C%8D%E5%8A%A1">1.5. DNS：因特网的目录服务</a><ul>
+<li><a href="#151-dns%E6%8F%90%E4%BE%9B%E7%9A%84%E6%9C%8D%E5%8A%A1">1.5.1. DNS提供的服务</a></li>
+<li><a href="#152-dns%E5%B7%A5%E4%BD%9C%E6%9C%BA%E7%90%86%E6%A6%82%E8%BF%B0">1.5.2. DNS工作机理概述</a><ul>
+<li><a href="#1521-%E5%88%86%E5%B8%83%E5%BC%8F%E5%B1%82%E6%AC%A1%E6%95%B0%E6%8D%AE%E5%BA%93">1.5.2.1. 分布式、层次数据库</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#16-tcp%E5%A5%97%E6%8E%A5%E5%AD%97%E7%BC%96%E7%A8%8B">1.6. TCP套接字编程</a><ul>
+<li><a href="#161-go%E5%AE%A2%E6%88%B7%E6%9C%BA%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E4%BE%8B%E5%AD%90">1.6.1. Go客户机/服务器应用程序例子</a></li>
+</ul>
+</li>
+<li><a href="#17-udp%E5%A5%97%E6%8E%A5%E5%AD%97%E7%BC%96%E7%A8%8B">1.7. UDP套接字编程</a></li>
+</ul>
+</li>
+</ul>
+<!-- /TOC -->
+<h1 id="1-应用层"><a href="#1-应用层" class="headerlink" title="1. 应用层"></a>1. 应用层</h1><h2 id="1-1-应用层协议原理"><a href="#1-1-应用层协议原理" class="headerlink" title="1.1. 应用层协议原理"></a>1.1. 应用层协议原理</h2><h3 id="1-1-1-网络应用程序体系结构"><a href="#1-1-1-网络应用程序体系结构" class="headerlink" title="1.1.1. 网络应用程序体系结构"></a>1.1.1. 网络应用程序体系结构</h3><p>主流体系结构：客户机/服务器体系结构或对等体系结构。</p>
+<p>大多数流行的流量密集型程序都是P2P体系的。</p>
+<p>P2P体系结构的最突出特性之一是它的自扩展性。</p>
+<h3 id="1-1-2-因特网提供的运输服务"><a href="#1-1-2-因特网提供的运输服务" class="headerlink" title="1.1.2. 因特网提供的运输服务"></a>1.1.2. 因特网提供的运输服务</h3><h4 id="1-1-2-1-TCP服务"><a href="#1-1-2-1-TCP服务" class="headerlink" title="1.1.2.1. TCP服务"></a>1.1.2.1. TCP服务</h4><p>TCP服务模型包括面向连接服务和可靠数据传输服务。</p>
+<p>TCP是全双工的，提供拥塞控制机制。</p>
+<h4 id="1-1-2-2-UDP服务"><a href="#1-1-2-2-UDP服务" class="headerlink" title="1.1.2.2. UDP服务"></a>1.1.2.2. UDP服务</h4><p>UDP是一种不提供不必要服务的轻量级运输协议。UDP并不保障报文能够被接收进程收到，可能是乱序到达。</p>
+<p>UDP没有拥塞机制。</p>
+<h4 id="1-1-2-3-进程寻址"><a href="#1-1-2-3-进程寻址" class="headerlink" title="1.1.2.3. 进程寻址"></a>1.1.2.3. 进程寻址</h4><p>为了识别接收进程，需要定义两种信息：</p>
+<ul>
+<li>主机的名称或者地址</li>
+<li>指定目的主机上接收进程的标识</li>
+</ul>
+<p>Web服务用80端口，SMTP用25端口。</p>
+<h3 id="1-1-3-应用层协议"><a href="#1-1-3-应用层协议" class="headerlink" title="1.1.3. 应用层协议"></a>1.1.3. 应用层协议</h3><p>应用层协议定义了运行在不同端系统上的应用程序进程如何相互传递报文。特别是应用层协议定义了：</p>
+<ul>
+<li>交换的报文类型</li>
+<li>各种报文类型的语法</li>
+<li>字段的语义</li>
+<li>进程何时、如何发送报文以及对报文相应的规则</li>
+</ul>
+<h2 id="1-2-Web应用和HTTP协议"><a href="#1-2-Web应用和HTTP协议" class="headerlink" title="1.2. Web应用和HTTP协议"></a>1.2. Web应用和HTTP协议</h2><p>HTTP：超文本传输协议</p>
+<p>Web页面是由对象组成的。</p>
+<p>每个URL地址由两部分组成：存放对象的服务器主机名和对象的路径名。</p>
+<p>服务器向客户机发送被请求的文件时，并不储存任何关于该客户机的状态信息，所以HTTP是==无状态协议==。</p>
+<h3 id="1-2-1-非持久连接和持久连接"><a href="#1-2-1-非持久连接和持久连接" class="headerlink" title="1.2.1. 非持久连接和持久连接"></a>1.2.1. 非持久连接和持久连接</h3><p>TCP协议之上，应用程序的研制者需要确定每个请求?响应对是经一个单独的TCP连接发送，还是所有的请求及相应的相应经相同的TCP连接发送。前一种为非持久连接，后一种为持久连接。</p>
+<p>HTTP默认使用持久连接。</p>
+<p>往返时间（RTT）：一个分组从客户机到服务器再回到客户机所花费的时间。</p>
+<p>RTT包括分组传播时延、分组在中间路由器和交换机的排队时延以及分组处理时延。</p>
+<h3 id="1-2-2-HTTP报文格式"><a href="#1-2-2-HTTP报文格式" class="headerlink" title="1.2.2. HTTP报文格式"></a>1.2.2. HTTP报文格式</h3><h4 id="1-2-2-1-HTTP请求报文"><a href="#1-2-2-1-HTTP请求报文" class="headerlink" title="1.2.2.1. HTTP请求报文"></a>1.2.2.1. HTTP请求报文</h4><p>请求报文包括请求行、请求头和请求体。</p>
+<p>请求行有请求方法、请求路径、HTTP版本</p>
+<p>方法有GET、POST、PUT、DELETE、OPTIONS、HEAD</p>
+<p>头部中，<code>Connection: close</code>关闭持久连接；<code>User-agent</code>：浏览器类型； 首部字段Date表明创建HTTP报文的日期和时间 </p>
+<h4 id="1-2-2-2-HTTP响应报文"><a href="#1-2-2-2-HTTP响应报文" class="headerlink" title="1.2.2.2. HTTP响应报文"></a>1.2.2.2. HTTP响应报文</h4><p>响应报文包括状态行、响应头和响应体。</p>
+<p>状态行包括协议版本、状态码、状态信息。</p>
+<p>响应头：<code>Content-Length</code>：相应的字节数；<code>Content-Type</code>：相应的类型。</p>
+<p>状态码：200 请求成功；301 永久重定向；400 错误请求；404 资源不存在；505 服务器不支持该版本</p>
+<h3 id="1-2-3-cookie"><a href="#1-2-3-cookie" class="headerlink" title="1.2.3. cookie"></a>1.2.3. cookie</h3><p>HTTP服务是无状态的，可以使用cookie跟中用户行为。</p>
+<p>cookie技术有四个组成部分：</p>
+<ol>
+<li>在HTTP响应报文中有一个cookie首部行</li>
+<li>在HTTP请求报文中有一个cookie首部行</li>
+<li>在用户端系统中保留一个cookie文件，由用户的浏览器管理</li>
+<li>在Web站点有个后端服务器</li>
+</ol>
+<h3 id="1-2-4-Web缓存"><a href="#1-2-4-Web缓存" class="headerlink" title="1.2.4. Web缓存"></a>1.2.4. Web缓存</h3><p>Web缓存服务器也叫代理服务器。</p>
+<p>Web缓存器有自己的磁盘存储空间，并在该存储空间中保存最近请求过的对象的拷贝。</p>
+<p>假设浏览器在请求对象：</p>
+<ol>
+<li>浏览器建立到Web缓存器的TCP连接，发送HTTP请求</li>
+<li>Web缓存器如果有该对象则返回</li>
+<li>如果缓存器没有，则向初始服务器打开TCP连接，发送HTTP请求</li>
+<li>缓存器收到对象后，存储到本地，再返回给客户端</li>
+</ol>
+<h3 id="1-2-5-条件GET方法"><a href="#1-2-5-条件GET方法" class="headerlink" title="1.2.5. 条件GET方法"></a>1.2.5. 条件GET方法</h3><p>用来证实缓存器的对象是最新的：</p>
+<ol>
+<li>请求报文使用GET方法</li>
+<li>请求报文中包含一个<code>If-midified-since:</code>首部行</li>
+</ol>
+<p>304 未修改</p>
+<h2 id="1-3-文件传输协议：FTP"><a href="#1-3-文件传输协议：FTP" class="headerlink" title="1.3. 文件传输协议：FTP"></a>1.3. 文件传输协议：FTP</h2><p>FTP使用两个并行的TCP连接来传输文件，一个时控制连接，一个是数据连接。</p>
+<p>控制连接（21端口）用来在两个主机之间传输控制信息，如用户标识、口令、改变远程目录的命令以及<code>put</code>、<code>get</code>文件的命令。数据连接（20端口）用来实际传输一个文件。</p>
+<p>因为FTP协议使用一个分离的控制连接，所以也称FTP的控制信息是带外传送。</p>
+<p>HTTP是带内发送控制信息的。</p>
+<p>FTP控制连接贯穿了整个用户会话期间，但是会话中的每一次文件都需要建立一个新的数据连接。</p>
+<p>FtP服务器必须在整个会话期间保留用户的状态信息。</p>
+<h2 id="1-4-因特网中的电子邮件"><a href="#1-4-因特网中的电子邮件" class="headerlink" title="1.4. 因特网中的电子邮件"></a>1.4. 因特网中的电子邮件</h2><p>因特网电子邮件系统有3个主要组成部分：用户代理、邮件服务器和简单邮件传输协议。</p>
+<h3 id="1-4-1-SMTP"><a href="#1-4-1-SMTP" class="headerlink" title="1.4.1. SMTP"></a>1.4.1. SMTP</h3><p>SMTP是因特网电子邮件应用的核心。</p>
+<p>SMTP用于从发送方的服务器发送报文到接收方的服务器。</p>
+<p>SMTP使用持久连接。</p>
+<h3 id="1-4-2-与HTTP的对比"><a href="#1-4-2-与HTTP的对比" class="headerlink" title="1.4.2. 与HTTP的对比"></a>1.4.2. 与HTTP的对比</h3><p>HTTP是拉协议，人们从服务器拉取信息；SMTP是推协议，发送服务器把文件推向接收服务器。</p>
+<p>SMTP要求每个报文使用7位ASCII码格式；HTTP数据没有编码限制。</p>
+<p>HTTP把对象封装到自己的HTTP相应报文；SMTP把酥油的报文对象放到同一个报文中。</p>
+<h3 id="1-4-3-邮件报文格式和MIME"><a href="#1-4-3-邮件报文格式和MIME" class="headerlink" title="1.4.3. 邮件报文格式和MIME"></a>1.4.3. 邮件报文格式和MIME</h3><p>报文首部：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">From: alice@crepes.fr</span><br><span class="line">To: bob@hahaha.com</span><br><span class="line">Subject: test</span><br></pre></td></tr></table></figure>
+
+<p>MIME：多用途因特网邮件扩展。</p>
+<p>MIME通过<code>Content-Type</code>和<code>Content-Transfer-Encoding</code>确定传输文件类型</p>
+<h3 id="1-4-4-邮件访问协议"><a href="#1-4-4-邮件访问协议" class="headerlink" title="1.4.4. 邮件访问协议"></a>1.4.4. 邮件访问协议</h3><p>第三版邮局协议POP3</p>
+<p>因特网邮件访问协议IMAP</p>
+<p>IMAP可以将邮件在用户文件夹中移动，POP3没有该功能。</p>
+<h2 id="1-5-DNS：因特网的目录服务"><a href="#1-5-DNS：因特网的目录服务" class="headerlink" title="1.5. DNS：因特网的目录服务"></a>1.5. DNS：因特网的目录服务</h2><h3 id="1-5-1-DNS提供的服务"><a href="#1-5-1-DNS提供的服务" class="headerlink" title="1.5.1. DNS提供的服务"></a>1.5.1. DNS提供的服务</h3><p>DNS是应用层协议：</p>
+<ol>
+<li>使用客户机/服务器模式在通信的端系统之间运行</li>
+<li>在通信的端系统之间通过下面的端到端运输层协议来传输DNS报文</li>
+</ol>
+<p>域名系统（Domain Name System）的主要任务是进行主机名到IP地址的转换。</p>
+<p>DNS：</p>
+<ol>
+<li>一个由分层的DNS服务器实现的分布式数据库</li>
+<li>一个允许主机查询分布式数据库的应用层协议</li>
+</ol>
+<p>DNS协议运行在UDP上，默认53端口。</p>
+<p>除了主机名到IP地址的转换，DNS还提供一些重要服务：</p>
+<ul>
+<li><p>主机别名</p>
+</li>
+<li><p>邮件服务器别名</p>
+</li>
+<li><p>负载分配</p>
+<p>  <img src="https://i.loli.net/2020/03/22/s1bfoL4WwrT7Nea.png" alt="1584761679091"></p>
+</li>
+</ul>
+<h3 id="1-5-2-DNS工作机理概述"><a href="#1-5-2-DNS工作机理概述" class="headerlink" title="1.5.2. DNS工作机理概述"></a>1.5.2. DNS工作机理概述</h3><h4 id="1-5-2-1-分布式、层次数据库"><a href="#1-5-2-1-分布式、层次数据库" class="headerlink" title="1.5.2.1. 分布式、层次数据库"></a>1.5.2.1. 分布式、层次数据库</h4><p>有三种类型的DNS服务器：</p>
+<ul>
+<li>根DNS服务器</li>
+<li>顶级域DNS服务器</li>
+<li>权威DNS服务器</li>
+</ul>
+<p><img src="https://i.loli.net/2020/03/22/2Xxg8P5nfcIHM1O.png" alt="1584761850804"></p>
+<p>DNS解析从根服务器-&gt;顶级DNS服务器-&gt;权威服务器</p>
+<p>本地DNS服务器严格来说不算DNS服务器的层次结构。</p>
+<h2 id="1-6-TCP套接字编程"><a href="#1-6-TCP套接字编程" class="headerlink" title="1.6. TCP套接字编程"></a>1.6. TCP套接字编程</h2><p>流是输入和输出进程的字符序列。</p>
+<h3 id="1-6-1-Go客户机-服务器应用程序例子"><a href="#1-6-1-Go客户机-服务器应用程序例子" class="headerlink" title="1.6.1. Go客户机/服务器应用程序例子"></a>1.6.1. Go客户机/服务器应用程序例子</h3><ol>
+<li>客户机从标准输入读取一行字符，通过套接字将该行发送到服务器</li>
+<li>服务器从套接字读取一行字符</li>
+<li>服务器将该字符转为大写</li>
+<li>服务器把修改的行返回客户机</li>
+<li>客户机接收修改后的行，然后打印出来</li>
+</ol>
+<p>客户端代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;log&quot;</span></span><br><span class="line">	<span class="string">&quot;bufio&quot;</span></span><br><span class="line">	<span class="string">&quot;net&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	message := <span class="string">&quot;hello, this is a test text\n&quot;</span></span><br><span class="line">	conn, err := net.Dial(<span class="string">&quot;tcp&quot;</span>, <span class="string">&quot;localhost:8000&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Println(err)</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Fprint(conn, message)</span><br><span class="line">	scanner := bufio.NewScanner(conn)</span><br><span class="line">	<span class="keyword">for</span> scanner.Scan() &#123;</span><br><span class="line">		fmt.Println(scanner.Text())</span><br><span class="line">	&#125;</span><br><span class="line">	conn.CLose()</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>服务器代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;net&quot;</span></span><br><span class="line">	<span class="string">&quot;log&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;bufio&quot;</span></span><br><span class="line">	<span class="string">&quot;strings&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	ln, err := net.Listen(<span class="string">&quot;tcp&quot;</span>, <span class="string">&quot;:8000&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Println(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		conn, err := ln.Accept()</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">&quot;Bad request&quot;</span>)</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">go</span> handle(conn)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">handle</span><span class="params">(conn net.Conn)</span></span> &#123;</span><br><span class="line">	scanner := bufio.NewScanner(conn)</span><br><span class="line">	<span class="keyword">for</span> scanner.Scan() &#123;</span><br><span class="line">		t := scanner.Text()</span><br><span class="line">		t = strings.ToUpper(t)</span><br><span class="line">		fmt.Fprintln(conn, t)</span><br><span class="line">	&#125;</span><br><span class="line">	conn.Close()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-7-UDP套接字编程"><a href="#1-7-UDP套接字编程" class="headerlink" title="1.7. UDP套接字编程"></a>1.7. UDP套接字编程</h2><p>UDP是一种无连接的服务，即在两个进程之间没有创建管道所需的初始握手阶段。因为UDP没有管道，所以当一个进程需要想另一个进程发送一批字节时，发送过程需要为这批字节附上目的地址。将带有IP目的地址和端口号的一批字节数组称为==分组==。</p>
+<p>客户端代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;net&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	message := <span class="string">&quot;hello, this is a test text\n&quot;</span></span><br><span class="line">	service := <span class="string">&quot;localhost:8000&quot;</span></span><br><span class="line">	addr, _ := net.ResolveUDPAddr(<span class="string">&quot;udp4&quot;</span>, service)</span><br><span class="line">	conn, _ := net.DialUDP(<span class="string">&quot;udp&quot;</span>, <span class="literal">nil</span>, addr)</span><br><span class="line">	<span class="keyword">defer</span> conn.Close()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> buf [<span class="number">512</span>]<span class="keyword">byte</span></span><br><span class="line">	conn.Write([]<span class="keyword">byte</span>(message))</span><br><span class="line">	n, _ := conn.Read(buf[<span class="number">0</span>:])</span><br><span class="line">	fmt.Println(<span class="keyword">string</span>(buf[:n]))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>服务器代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;net&quot;</span></span><br><span class="line">	<span class="string">&quot;log&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;strings&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	service := <span class="string">&quot;:8000&quot;</span></span><br><span class="line">	addr, err := net.ResolveUDPAddr(<span class="string">&quot;udp4&quot;</span>, service)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Println(err)</span><br><span class="line">	&#125;</span><br><span class="line">	conn, err := net.ListenUDP(<span class="string">&quot;udp&quot;</span>, addr)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Println(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		handle(conn)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">handle</span><span class="params">(conn *net.UDPConn)</span></span> &#123;</span><br><span class="line">	<span class="keyword">defer</span> conn.Close()</span><br><span class="line">    <span class="keyword">var</span> buf [<span class="number">512</span>]<span class="keyword">byte</span></span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        n, rAddr, err := conn.ReadFromUDP(buf[<span class="number">0</span>:])</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">        fmt.Println(<span class="string">&quot;Receive from client&quot;</span>, rAddr.String(), <span class="keyword">string</span>(buf[<span class="number">0</span>:n]))</span><br><span class="line">        _, err2 := conn.WriteToUDP([]<span class="keyword">byte</span>(strings.ToUpper(<span class="keyword">string</span>(buf[:n]))), rAddr)</span><br><span class="line">        <span class="keyword">if</span> err2 != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://crazystrome.github.io/2020/10/14/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="crazyStrome">
+      <meta itemprop="description" content="啥都写">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="crazyStrome的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 18:23:20" itemprop="dateCreated datePublished" datetime="2020-10-14T18:23:20+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-04-06 20:43:01" itemprop="dateModified" datetime="2020-04-06T20:43:01+08:00">2020-04-06</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="无线网络和移动网络"><a href="#无线网络和移动网络" class="headerlink" title="无线网络和移动网络"></a>无线网络和移动网络</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>无线主机：无线主机可以是便携机、掌上计算机、PDA、电话或者台式计算机。</p>
+<p>无线链路。主机通过无线通信链路连接到一个基站或者另外一个无线主机。不同的无线链路技术有不同的传输速率和传输距离。</p>
+<p>基站。基站是无线网络基础设施的一个关键部分。与无线主机和无线链路不同，基站在有线网络中没有明确的对应设备。它负责向与之关联的无线主机发送数据和从主机那里接收数据。</p>
+<p>当一台移动主机移动范围超出一个基站的覆盖范围而到达另一个基站的覆盖范围后，它将改变其接入更大网络的连接点，这一过程称为切换。</p>
+<p>网络基础设施。无线主机希望与之通信的更大的网络。</p>
+<p>单跳，基于基础设施。这些网络具有与较大的有线网络连接的基站。此外，该基站与无线主机之间的所有通信都通过一个无线跳。</p>
+<p>单跳，无基础设施。在这些网络中，存在与无线网络相连的基站。</p>
+<p>多跳，基于基础设施。某些传感网络和所谓的无线网状网络属于这种类别。</p>
+<p>多跳，无基础设施。这些网络没有基站，并且节点为了到达目的地可能必须在几个其他无线节点之间中继报文。有移动自组织网络和车载自组织网络。</p>
+<h2 id="无线链路和网络特征"><a href="#无线链路和网络特征" class="headerlink" title="无线链路和网络特征"></a>无线链路和网络特征</h2><p>有线链路和无线链路之间的区别：</p>
+<p>递减的信号强度。电磁波在穿过物体时强度会减弱。</p>
+<p>来自其他源的干扰。同一个频段发送信号的电波源将相互干扰。</p>
+<p>多路径传播。电磁波的反射会出现多路径传播。</p>
+<p>信噪比（SNR）是收到的信号和噪声强度的相对测量。</p>
+<p>码分多址（CDMA）属于信道划分的家族，在无线LAN和蜂窝技术中应用很广泛。</p>
+<h2 id="WiFi：802-11无线LAN"><a href="#WiFi：802-11无线LAN" class="headerlink" title="WiFi：802.11无线LAN"></a>WiFi：802.11无线LAN</h2><h3 id="802-11体系结构"><a href="#802-11体系结构" class="headerlink" title="802.11体系结构"></a>802.11体系结构</h3><p>BSS：基本服务集</p>
+<p>一个BSS通常包含一个或多个无线站点和一个称为接入点的中央基站。</p>
+<p> <img src="https://i.loli.net/2020/04/06/tQG23yMmkjsKAJZ.png" alt="image-20200406204012079"></p>
+<h3 id="802-11-MAC协议"><a href="#802-11-MAC协议" class="headerlink" title="802.11 MAC协议"></a>802.11 MAC协议</h3><p>带碰撞避免的CSMA</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://crazystrome.github.io/2020/10/14/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E7%BD%91%E7%BB%9C%E5%B1%82/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="crazyStrome">
+      <meta itemprop="description" content="啥都写">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="crazyStrome的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E7%BD%91%E7%BB%9C%E5%B1%82/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 18:23:20" itemprop="dateCreated datePublished" datetime="2020-10-14T18:23:20+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-04-04 09:13:01" itemprop="dateModified" datetime="2020-04-04T09:13:01+08:00">2020-04-04</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <!-- TOC -->
+
+<ul>
+<li><a href="#1-%E7%BD%91%E7%BB%9C%E5%B1%82">1. 网络层</a><ul>
+<li><a href="#11-%E6%A6%82%E8%BF%B0">1.1. 概述</a><ul>
+<li><a href="#111-%E8%BD%AC%E5%8F%91%E5%92%8C%E9%80%89%E8%B7%AF">1.1.1. 转发和选路</a></li>
+<li><a href="#112-%E7%BD%91%E7%BB%9C%E6%9C%8D%E5%8A%A1%E6%A8%A1%E5%9E%8B">1.1.2. 网络服务模型</a></li>
+</ul>
+</li>
+<li><a href="#12-%E8%99%9A%E7%94%B5%E8%B7%AF%E5%92%8C%E6%95%B0%E6%8D%AE%E6%8A%A5%E7%BD%91%E7%BB%9C">1.2. 虚电路和数据报网络</a><ul>
+<li><a href="#121-%E8%99%9A%E7%94%B5%E8%B7%AF%E7%BD%91%E7%BB%9C">1.2.1. 虚电路网络</a></li>
+<li><a href="#122-%E6%95%B0%E6%8D%AE%E6%8A%A5%E7%BD%91%E7%BB%9C">1.2.2. 数据报网络</a></li>
+</ul>
+</li>
+<li><a href="#13-%E8%B7%AF%E7%94%B1%E5%99%A8%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86">1.3. 路由器工作原理</a><ul>
+<li><a href="#131-%E8%BE%93%E5%85%A5%E7%AB%AF%E5%8F%A3">1.3.1. 输入端口</a></li>
+<li><a href="#132-%E4%BA%A4%E6%8D%A2%E7%BB%93%E6%9E%84">1.3.2. 交换结构</a></li>
+<li><a href="#133-%E8%BE%93%E5%87%BA%E7%AB%AF%E5%8F%A3">1.3.3. 输出端口</a></li>
+<li><a href="#134-%E4%BD%95%E6%97%B6%E5%87%BA%E7%8E%B0%E6%8E%92%E9%98%9F">1.3.4. 何时出现排队</a></li>
+</ul>
+</li>
+<li><a href="#14-%E7%BD%91%E9%99%85%E5%8D%8F%E8%AE%AE%E5%9B%A0%E7%89%B9%E7%BD%91%E4%B8%AD%E7%9A%84%E8%BD%AC%E5%8F%91%E5%92%8C%E7%BC%96%E5%9D%80">1.4. 网际协议：因特网中的转发和编址</a><ul>
+<li><a href="#141-%E6%95%B0%E6%8D%AE%E6%8A%A5%E6%A0%BC%E5%BC%8F">1.4.1. 数据报格式</a></li>
+<li><a href="#142-ipv4%E7%BC%96%E5%9D%80">1.4.2. IPv4编址</a></li>
+<li><a href="#143-icmp%E4%BA%92%E8%81%94%E7%BD%91%E6%8E%A7%E5%88%B6%E6%8A%A5%E6%96%87%E5%8D%8F%E8%AE%AE">1.4.3. ICMP：互联网控制报文协议</a></li>
+</ul>
+</li>
+<li><a href="#15-%E9%80%89%E8%B7%AF%E7%AE%97%E6%B3%95">1.5. 选路算法</a></li>
+<li><a href="#16-%E5%9B%A0%E7%89%B9%E7%BD%91%E4%B8%AD%E7%9A%84%E9%80%89%E8%B7%AF">1.6. 因特网中的选路</a><ul>
+<li><a href="#161-%E5%9B%A0%E7%89%B9%E7%BD%91%E4%B8%AD%E8%87%AA%E6%B2%BB%E7%B3%BB%E7%BB%9F%E5%86%85%E9%83%A8%E9%80%89%E8%B7%AFip">1.6.1. 因特网中自治系统内部选路：IP</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- /TOC -->
+<h1 id="1-网络层"><a href="#1-网络层" class="headerlink" title="1. 网络层"></a>1. 网络层</h1><p><strong>转发</strong>涉及分组从一条入链路到一台路由器中的出链路的传送。<strong>选路</strong>涉及一个网络中的所有路由器，它们经选路协议共同交互，以决定分组从源到目的地结点所采用的路径。</p>
+<h2 id="1-1-概述"><a href="#1-1-概述" class="headerlink" title="1.1. 概述"></a>1.1. 概述</h2><p>路由器不运行应用层和传输层协议</p>
+<h3 id="1-1-1-转发和选路"><a href="#1-1-1-转发和选路" class="headerlink" title="1.1.1. 转发和选路"></a>1.1.1. 转发和选路</h3><p>网络层的作用是把分组从发送主机移动到接收主机。为此，需要两种重要的功能：</p>
+<ul>
+<li>转发。当一个分组到达某路由器的一条输入链路时，该路由器必须将该分组移动到适当的输出链路。</li>
+<li>选路。当分组从发送方流向接收方时，网络层必须决定这些分组所采用的路由或路径。计算这些路径的算法被称为选路算法。</li>
+</ul>
+<p>每台路由器有一张<strong>转发表</strong>。路由通过检查到达分组首部中的一个字段，然后使用该值在该路由器的转发表中索引查询来转发一个分组。</p>
+<p><strong>分组交换机</strong>是指一台通用分组交换设备，它根据分组首部字段中的值，从输入链路接口道输出链路接口传送分组。某些分组交换机称为链路交换机。其他的分组交换机称为路由器。</p>
+<h3 id="1-1-2-网络服务模型"><a href="#1-1-2-网络服务模型" class="headerlink" title="1.1.2. 网络服务模型"></a>1.1.2. 网络服务模型</h3><p>网络服务模型定义网络的一侧边缘到另一侧边缘之间分组的端到端运输特性。</p>
+<p>在发送主机，当运输层向网络层传递一个分组时，能由网络层提供的特定服务包括：</p>
+<ul>
+<li>确保交付。该服务确保分组将最终到达目的地。</li>
+<li>具有时延上界的确保交付。该服务不仅确保分组的交付，而且在特定的主机到主机时延上界内交付。</li>
+</ul>
+<p>此外，下列服务能够为给定的源和目的之间提供分组的流：</p>
+<ul>
+<li>有序分组交付。</li>
+<li>确保最小带宽。</li>
+<li>确保最大时延抖动。</li>
+<li>安全性服务。</li>
+</ul>
+<p>因特网的网络层称为<strong>尽力而为的服务</strong>。</p>
+<h2 id="1-2-虚电路和数据报网络"><a href="#1-2-虚电路和数据报网络" class="headerlink" title="1.2. 虚电路和数据报网络"></a>1.2. 虚电路和数据报网络</h2><p>运输层能够为网络提供无连接服务或面向连接服务。网络层也能提供无连接服务和连接服务。差异：</p>
+<ul>
+<li>在网络层中，这些服务是由网络层想运输层提供的主机到主机的服务。在运输层中，这些服务是运输层向应用层提供的进程到进程的服务。</li>
+<li>网络层或者提供主机到主机的无连接服务，或者提供主机到主机的连接服务，而不同时提供两种。仅在网络层提供链接服务的计算机网络称为<strong>虚电路网络</strong>。仅在网络层提供无连接服务的计算机网络被称为<strong>数据报网络</strong>。</li>
+<li>在运输层实现面向连接的服务与在网络层中实现连接服务是根本不同的。运输层是在网络边缘的端系统中实现，网络层的连接服务除了在端系统中实现，还在网络核心的路由器中实现。</li>
+</ul>
+<h3 id="1-2-1-虚电路网络"><a href="#1-2-1-虚电路网络" class="headerlink" title="1.2.1. 虚电路网络"></a>1.2.1. 虚电路网络</h3><p>端系统向网络发送指示虚电路启动与终止的报文，以及路由器之间传递的用于建立虚电路的报文称为<strong>信令报文</strong>，用来交换这些报文的协议常被称为信令协议。</p>
+<h3 id="1-2-2-数据报网络"><a href="#1-2-2-数据报网络" class="headerlink" title="1.2.2. 数据报网络"></a>1.2.2. 数据报网络</h3><p>在数据报网络中，每当一个端系统要发送分组时，它就为该分组加上目的端系统的地址，然后将分组推进网络中。</p>
+<p>最长前缀匹配规则：在路右边中寻找最长的匹配项，并向与最长前缀匹配的链路接口转发该分组。</p>
+<h2 id="1-3-路由器工作原理"><a href="#1-3-路由器工作原理" class="headerlink" title="1.3. 路由器工作原理"></a>1.3. 路由器工作原理</h2><p><img src="https://i.loli.net/2020/03/26/vFp4EgdGSQuLfZV.png" alt="路由器体系结构"></p>
+<p>路由器的四个组成部分：</p>
+<ul>
+<li>输入端口。输入端口执行几项功能。它要执行将一条输入的物理链路端接到路由器的物理层功能。也要执行为了入链路远端的数据链路层功能交互的数据链路层功能。还要完成查找和转发功能。多个端口经常被集中到路由器的一块线路卡上。</li>
+<li>交换结构。交换结构将路由器的输入端口连接到它的输出端口。</li>
+<li>输出端口。输出端口存储经过交换结构转发给他的分组，并将这些分组传输到输出链路。</li>
+<li>选路处理器。选路处理器执行选路协议，维护选路信息与转发表，并执行路由器中的网络管理功能。</li>
+</ul>
+<h3 id="1-3-1-输入端口"><a href="#1-3-1-输入端口" class="headerlink" title="1.3.1. 输入端口"></a>1.3.1. 输入端口</h3><p>输出端口的选择是使用转发表中包含的信息进行的，</p>
+<h3 id="1-3-2-交换结构"><a href="#1-3-2-交换结构" class="headerlink" title="1.3.2. 交换结构"></a>1.3.2. 交换结构</h3><p>通过交换结构，分组才能从一个输入端口交换到另一个输出端口。<br><img src="https://i.loli.net/2020/03/26/iYqf3IFHtWmuUXd.png" alt="三种交换技术"><br>上图中的三种交换技术：</p>
+<ul>
+<li>经内存交换。</li>
+<li>经一根总线交换。</li>
+<li>经互联网络交换。</li>
+</ul>
+<h3 id="1-3-3-输出端口"><a href="#1-3-3-输出端口" class="headerlink" title="1.3.3. 输出端口"></a>1.3.3. 输出端口</h3><p><img src="https://i.loli.net/2020/03/26/yGlc7L8OYiw96Eu.png" alt="输出端口处理"></p>
+<h3 id="1-3-4-何时出现排队"><a href="#1-3-4-何时出现排队" class="headerlink" title="1.3.4. 何时出现排队"></a>1.3.4. 何时出现排队</h3><p>输出端口排队的后果就是，输出端口上的一个分组调度程序必须在这些排队的分组中选出一个来传送。</p>
+<p>如果没有足够的内存来缓存一个入分组，那么必须做出决定：要么丢弃到达的分组，要么删除一个或多个已排队的分组以便为新来的分组腾出空间。</p>
+<h2 id="1-4-网际协议：因特网中的转发和编址"><a href="#1-4-网际协议：因特网中的转发和编址" class="headerlink" title="1.4. 网际协议：因特网中的转发和编址"></a>1.4. 网际协议：因特网中的转发和编址</h2><p>因特网的网路层主要有三个组件。第一个是IP协议，第二个是选路组件，第三个是报告数据报中的差错和对某些网络层信息请求进行相应的设施。</p>
+<h3 id="1-4-1-数据报格式"><a href="#1-4-1-数据报格式" class="headerlink" title="1.4.1. 数据报格式"></a>1.4.1. 数据报格式</h3><p>IPv4数据报的关键字：</p>
+<ul>
+<li>版本号。着4比特规定了数据报的IP协议版本。</li>
+<li>首部长度。一般的IP数据报都有20个字节的首部。</li>
+<li>服务类型。</li>
+<li>数据报长度。</li>
+<li>标识、标志、片偏移。</li>
+<li>寿命。</li>
+<li>协议。该字段指定IP数据报部分应交给哪个运输层协议。</li>
+<li>首部校验和。</li>
+<li>源和目的IP地址。</li>
+<li>选项。</li>
+<li>数据（有效载荷）。</li>
+</ul>
+<p>一个链路层帧所能承载的最大数据量叫做最大传输单元（Maximun Transmission Unit，MTU）。</p>
+<p>当路由器中出链路的MTU比IP数据报小，就将数据报进行分片，用单独的链路层帧封装这些较小的IP数据报，然后向输出链路上发送这些帧。</p>
+<p>片在其到达目的地运输层以前需要被重新组装。为了让目的主机执行重新组装任务，IPv4的设计者将标识、标志和片偏移字段放在IP首部，当创建一个数据报时，发送主机在为该数据设置源和目的地址的同时加上标识号。发送主机通常将它发送的每个数据报中的标识号加一。最后一个片的标志比特位被设为0。用片偏移字段指定片应该放在初始IP数据报的哪个位置。</p>
+<h3 id="1-4-2-IPv4编址"><a href="#1-4-2-IPv4编址" class="headerlink" title="1.4.2. IPv4编址"></a>1.4.2. IPv4编址</h3><p>当主机中的IP想发送一个数据报时，它就在该链路上发送。主机与物理链路的边界为接口。</p>
+<p>路由器与它的任意一条链路之间的边界也叫做接口。一个IP地址再技术上是与一个接口相关联的。</p>
+<p>分类编址：听过把IP地址的网络部分限制为8比特、16比特和24比特，来构成A类、B类和C类地址。</p>
+<p>当一台主机发出一个目的地址为255.255.255.255的数据报时，该报文会被交付给同一个子网下的所有主机。</p>
+<p>动态主机配置协议DHCP：主机可以自动获取IP地址。</p>
+<p>网络地址转换NAT：把子网主机和网络主机IP进行转换。</p>
+<h3 id="1-4-3-ICMP：互联网控制报文协议"><a href="#1-4-3-ICMP：互联网控制报文协议" class="headerlink" title="1.4.3. ICMP：互联网控制报文协议"></a>1.4.3. ICMP：互联网控制报文协议</h3><p>ICMP用于主机和路由器彼此交换网络层信息。</p>
+<h2 id="1-5-选路算法"><a href="#1-5-选路算法" class="headerlink" title="1.5. 选路算法"></a>1.5. 选路算法</h2><p>一台主机通常直接和一台路由器相连接，该路由器称为该主机的默认路由器，又称为该主机的第一跳路由器。</p>
+<h2 id="1-6-因特网中的选路"><a href="#1-6-因特网中的选路" class="headerlink" title="1.6. 因特网中的选路"></a>1.6. 因特网中的选路</h2><h3 id="1-6-1-因特网中自治系统内部选路：IP"><a href="#1-6-1-因特网中自治系统内部选路：IP" class="headerlink" title="1.6.1. 因特网中自治系统内部选路：IP"></a>1.6.1. 因特网中自治系统内部选路：IP</h3><p>选路信息协议：RIP</p>
+<p>开放最短路径优先：OSPF</p>
+<p>RIP是一种距离向量协议。一条路径的最大费用被限制为15，因此RIP被限制在网络直径不超过15跳的自治系统内。在RIP中，选路更新信息在邻居之间通过RIP响应报文交换大约30秒交换一次。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://crazystrome.github.io/2020/10/14/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="crazyStrome">
+      <meta itemprop="description" content="啥都写">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="crazyStrome的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 18:23:20" itemprop="dateCreated datePublished" datetime="2020-10-14T18:23:20+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-04-05 09:29:19" itemprop="dateModified" datetime="2020-04-05T09:29:19+08:00">2020-04-05</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="链路层和局域网"><a href="#链路层和局域网" class="headerlink" title="链路层和局域网"></a>链路层和局域网</h1><h2 id="链路层：概述和服务"><a href="#链路层：概述和服务" class="headerlink" title="链路层：概述和服务"></a>链路层：概述和服务</h2><p>将主机和路由器均称为节点。把沿着通信路径连接相邻节点的通信信道称为链路。为了将一个数据报从源主机传输到目的主机，数据报必须通过端到端路径山高的没段链路传输。在通过特定链路时，传输节点将此数据报封装在链路层帧中，并将该帧发送到链路上；接收节点然后接收该帧并提取出数据报。</p>
+<h3 id="链路层提供的服务"><a href="#链路层提供的服务" class="headerlink" title="链路层提供的服务"></a>链路层提供的服务</h3><p><strong>链路层协议</strong>用来在独立的链路上移动数据报。链路层协议定义了链路两端的节点之间交换的分组格式，以及当发送和接收分组时这些节点采取的动作。链路层协议交换的数据单元称为<strong>帧</strong>。每个链路层帧通常封装了一个网络层的数据报。当发送和接收帧时，链路层协议所采取的动作包括差错检测、重传、流量控制和随机接入。链路层协议的例子包括以太网、802.11无限LAN、令牌环和PPP；在很多场合下，ATM也被认为是链路层协议。</p>
+<p>任何链路层的基本服务都是将数据报通过单一通信链路从一个结点移动到相邻节点，所提供的服务细节将随链路层协议从一种进入下一种而改变。链路层协议能够提供的可能服务包括：</p>
+<ul>
+<li>成帧。链路层协议把网络层数据报用链路层帧封装起来。一个帧由一个数据字段和若干个首部字段组成，其中网络层数据报就插在数据字段中。</li>
+<li>链路接入。媒体访问控制协议（Medium Access Control，MAC）规定了帧在链路上传输的规则。</li>
+<li>可靠交付。当链路层协议提供可靠交付服务时，它保证无差错地经链路层移动每个网络层数据报。链路层的可靠交付服务通常是通过确认和重传取得的。</li>
+<li>流量控制。链路每一端的结点都具有有限容量的帧缓存能力。</li>
+<li>差错检测。链路层的差错检测更复杂，并且用硬件实现。</li>
+<li>差错纠正。差错纠正和差错检测类似，区别在于接收方不仅能检测帧中是否引入了差错，而且能够准确的判断差错出现在哪里并纠正。</li>
+<li>半双工和全双工。采用全双工传输时，链路两端的节点可以同时传输分组。采用半双工传输时，一个结点不能同时进行传输和接收。</li>
+</ul>
+<h3 id="链路层在何处实现"><a href="#链路层在何处实现" class="headerlink" title="链路层在何处实现"></a>链路层在何处实现</h3><p>链路层的主体是在网络适配器中实现的，网络适配器也称为网络接口卡。网络适配器的内核是链路层控制器，该控制器通常实现了许多链路层服务的耽搁特定目的的芯片。链路层控制器的许多功能是用硬件实现的。</p>
+<h2 id="差错检测和纠错技术"><a href="#差错检测和纠错技术" class="headerlink" title="差错检测和纠错技术"></a>差错检测和纠错技术</h2><p>比特级差错检测和纠错是链路层提供的两种服务：对从一个节点发送到另一个物理上相邻的节点的链路层帧，检测和纠正其中的比特差错。</p>
+<p><img src="https://i.loli.net/2020/04/04/LASi17BzeIb3hND.png" alt="image-20200404201815455"></p>
+<h3 id="奇偶校验"><a href="#奇偶校验" class="headerlink" title="奇偶校验"></a>奇偶校验</h3><p>假设发送的信息D有d个比特，发送方只需包含一个附加的比特，选择它的值，使得这d+1个比特中1的总数是偶数，这是偶校验方案。如果丢失两个比特的话，就出现偶数个比特差错。可以使用二维奇偶校验方案。</p>
+<p>二维奇偶校验：将D中的d个数据分为i行j列，每行每列都进行一个校验，最后形成i+j+1个校验数。</p>
+<p>接收方检测和纠正差错的能力被称为前向纠错。</p>
+<h3 id="检验和方法"><a href="#检验和方法" class="headerlink" title="检验和方法"></a>检验和方法</h3><p>将数据D中的数据认为是k比特整数序列，将这k比特整数加起来，并用得到的和作为差错检测比特。</p>
+<h3 id="循环冗余检测"><a href="#循环冗余检测" class="headerlink" title="循环冗余检测"></a>循环冗余检测</h3><p>循环冗余检测（Cyclic Redundancy Check，CRC）编码也称为多项式编码（polynomial code），因为该编码能够将要发送的比特串看做是系数为0和1的一个多项式，对比特串的操作被解释为多项式算术。</p>
+<h2 id="多路访问协议"><a href="#多路访问协议" class="headerlink" title="多路访问协议"></a>多路访问协议</h2><p>点对点链路（point-to-point link）是由链路一端的单个发送方和链路另一端的单个接收方组成。</p>
+<p>点对点协议（Point-to-Point Protocol， PPP）和高级数据链路控制（High-level Data Link Control，HDLC）是两种这样的协议。</p>
+<p>广播链路（broadcast link）能够让多个发送和接收节点都连接到相同的、单一的、共享的广播信道上。</p>
+<p>当所有节点同时接到多个帧，即传输的帧在所有的接收方处发生碰撞了，接收节点没有一个可以获得任何有效的传输帧。</p>
+<p>任何的多路访问协议可以分为：信道划分协议、随机接入协议和轮流协议。</p>
+<h3 id="信道划分协议"><a href="#信道划分协议" class="headerlink" title="信道划分协议"></a>信道划分协议</h3><p>时分多路复用（TDM）和频分多路复用（FDM）是两种能够在所有共享信道结点之间用于划分广播信道带宽的技术。</p>
+<p>第三种是码分多址（CDMA）。时分和频分分别为结点分配时隙和频率，而CDMA对每个结点分配一种不同的编码。</p>
+<h3 id="随机接入协议"><a href="#随机接入协议" class="headerlink" title="随机接入协议"></a>随机接入协议</h3><p>当有碰撞时，设计碰撞的每个节点反复重发它的帧，直到该帧不碰撞的通过为止。当一个节点经受一次碰撞时，不必立刻重发该帧而是等待一个随机时延。</p>
+<h3 id="轮流协议"><a href="#轮流协议" class="headerlink" title="轮流协议"></a>轮流协议</h3><p>轮询协议：主节点依次轮询每个节点，让每个节点依次发送帧。</p>
+<p>令牌传递协议：令牌在节点之间传递，如果当前节点持有令牌且有数据帧要发送才能发送，否则向后传递令牌。</p>
+<h3 id="局域网"><a href="#局域网" class="headerlink" title="局域网"></a>局域网</h3><p>第一类局域网（LAN）基于随机接入。第二类LAN基于令牌传递技术组成，包括令牌环和光纤式分布数据接口（FDDI）。</p>
+<p>在令牌环LAN中，当某个节点获得令牌并发送一个帧时，该帧绕着整个环传播，从而创建一个虚拟广播信道。当目的节点接收之后，发送节点将该帧从环中去除，而FDDI是由接收节点去除。</p>
+<h2 id="链路层编址"><a href="#链路层编址" class="headerlink" title="链路层编址"></a>链路层编址</h2><h3 id="MAC地址"><a href="#MAC地址" class="headerlink" title="MAC地址"></a>MAC地址</h3><p>链路层地址为MAC地址，长6字节。IEEE负责MAC地址的分配。</p>
+<p>某适配器要向某些目的适配器发送一个帧时，发送适配器将目的适配器的MAC地址插入到该帧中，然后发送到LAN上。每个适配器都会匹配帧的MAC地址。</p>
+<p>有时某发送适配器的确要让LAN上所有的其他适配器来接收并处理它的帧，发送适配器在该帧的目的地址字段中插入一个特殊的MAC广播地址：FF-FF-FF-FF-FF-FF。</p>
+<h3 id="地址解析协议"><a href="#地址解析协议" class="headerlink" title="地址解析协议"></a>地址解析协议</h3><p>地址解析协议（ARP）将网络层地址和链路层地址进行转换。</p>
+<p>发送数据报时需要提供IP地址和MAC地址。</p>
+<p>DNS为在因特网中的任何地方的主机解析主机名。ARP只为在同一个子网中的节点解析IP地址。</p>
+<p>每个节点的ARP模块都有一个ARP表，这张表包含IP地址到MAC地址的映射关系。</p>
+<h2 id="以太网"><a href="#以太网" class="headerlink" title="以太网"></a>以太网</h2><p>集线器是一种物理设备，它作用于比特而不是帧，放大收到的比特。</p>
+<h3 id="以太网帧结构"><a href="#以太网帧结构" class="headerlink" title="以太网帧结构"></a>以太网帧结构</h3><p>发送适配器在一个以太网帧中封装了一个IP数据报，并把该帧传递到物理层。接收适配器从物理层接收这个帧，提取出IP数据报，并将该IP数据报传递给网络层。以太网帧的字段：</p>
+<ul>
+<li>数据字段。这个字段承载了IP数据报。以太网的最大传输单元（MTU）是1500字节。这意味着如果IP数据报超过1500字节，则主机必须将该数据报分段。数据报的最小长度是46字节。如果IP数据报小于46字节，数据报必须被填充到46字节。当采用填充时传递到网络层的数据包包括IP数据报和填充部分。网络层使用IP数据报首部中的长度字段来去除该填充。</li>
+<li>目的地址。该字段包含目的适配器的MAC地址。当适配器收到一个帧，无论帧中的目的地址是它的MAC地址还是MAC广播地址，都将该帧的数据字段内容传递给网络层。</li>
+<li>源地址。该字段包含帧的源地址</li>
+<li>类型字段（2字节）。该类型字段允许以太网复用多中网络协议。适配器通过该字段得知数据字段中的内容是从哪个网路层协议或者发送到哪个网路层协议的。</li>
+<li>循环冗余检测。使接收适配器检测帧中是否引入了差错。</li>
+<li>前同步码。以太网帧以8个字节的前同步码开始，前七个字节都是10101010，最后一个字节时10101011.前七个字节用于将接收适配器和发送适配器的时钟同步。</li>
+</ul>
+<p>以太网使用基带传输。</p>
+<p>所有的以太网技术都向网络层提供无连接服务。</p>
+<p>所有的以太网技术都向网络层提供不可靠服务。</p>
+<h3 id="CSMA-CD：以太网多路访问协议"><a href="#CSMA-CD：以太网多路访问协议" class="headerlink" title="CSMA/CD：以太网多路访问协议"></a>CSMA/CD：以太网多路访问协议</h3><p>当一个节点通过集线器互联时，该以太网LAN是一个真正的广播LAN，即当某适配器传输一帧时，LAN上所有的适配器都收到该帧。CSMA/CD使用了如下机制：</p>
+<ol>
+<li>适配器可以在任何时刻开始传输</li>
+<li>当一个适配器侦听到有其他适配器在传输，它绝不会传输帧；使用了载波侦听</li>
+<li>一旦传输中的适配器检测到另一个适配器正在传输，就终止它的传输；使用了碰撞检测</li>
+<li>在尝试重传之前，等待一个随机延时，这个时间通常比传输一帧的时间要短</li>
+</ol>
+<p>在一个特定的适配器中，CSMA/CD协议按如下方式工作：</p>
+<ol>
+<li>适配器从网路程得到一个数据报，准备一个以太网帧，并把该帧放到适配器缓存区中。</li>
+<li>如果适配器侦听到信道空闲，它开始传输该帧。</li>
+<li>在传输过程中，适配器监视来自其他适配器的信号能量的出现如果该适配器传输了整个帧，而没有检测到来=来自其他适配器的信号能量，它就完成了该帧的传输。</li>
+<li>如果适配器在传输中检测到来自其他适配器的信号能量，它就停止传输它的帧，而代之以传输一个48比特的阻塞信号。</li>
+<li>在中止以后，适配器进入一个指数后退阶段。然后回到第二步。</li>
+</ol>
+<h3 id="以太网技术"><a href="#以太网技术" class="headerlink" title="以太网技术"></a>以太网技术</h3><h2 id="链路层交换机"><a href="#链路层交换机" class="headerlink" title="链路层交换机"></a>链路层交换机</h2><p>交换机的任务是接收入链路帧并将它们转发到出链路。交换机自身对节点是透明的。</p>
+<h3 id="交换机转发和过滤"><a href="#交换机转发和过滤" class="headerlink" title="交换机转发和过滤"></a>交换机转发和过滤</h3><p>过滤是交换机决定一个帧是应该转发到某个接口还是应当将其丢弃的功能。转发是决定一个帧时应该被导向哪个接口，并把该帧移向该接口的功能交换机的过滤和转发借助于交换机表完成。交换机表的一个表项包括：节点的MAC地址；达到该节点的交换机接口；用于节点的表项放置在表中的时间。交换机转发分组是基于MAC地址而不是IP地址。</p>
+<h3 id="自学习"><a href="#自学习" class="headerlink" title="自学习"></a>自学习</h3><ol>
+<li>交换机表初始为空</li>
+<li>对于在某接口接收到的每个入帧，该交换机在其表中存储：该帧源地址的MAC地址；该帧到达的接口；当前的时间。交换机以这种方式在他的表中记录发送节点所在的LAN网段。</li>
+<li>如果在一段时间（老化期）后，交换机没有接收到以该址作为源地址的帧，就在该表中删除该地址。</li>
+</ol>
+<p>交换机是即插即用设备。交换机也是全双工的。</p>
+<h3 id="链路层交换机的性质"><a href="#链路层交换机的性质" class="headerlink" title="链路层交换机的性质"></a>链路层交换机的性质</h3><p>交换机的优点：</p>
+<ul>
+<li>消除碰撞。</li>
+<li>异质的链路。交换机将链路彼此隔离，LAN中的不同链路能够以不同的速率运行并且能够在不同的媒体上运行。</li>
+<li>管理。</li>
+</ul>
+<h3 id="交换机和路由器的比较"><a href="#交换机和路由器的比较" class="headerlink" title="交换机和路由器的比较"></a>交换机和路由器的比较</h3><p>交换机是即查即用的。交换机还能够具有相对高的分组过滤和转发速率。交换机对于广播风暴不提供任何保护措施。</p>
+<p>路由器对第二层的广播风暴提供了防火墙保护。</p>
+<h2 id="PPP：点对点协议"><a href="#PPP：点对点协议" class="headerlink" title="PPP：点对点协议"></a>PPP：点对点协议</h2><p>PPP通常是住宅主机拨号链路所选择的协议。</p>
+<h2 id="链路虚拟化：网络作为链路层"><a href="#链路虚拟化：网络作为链路层" class="headerlink" title="链路虚拟化：网络作为链路层"></a>链路虚拟化：网络作为链路层</h2><h3 id="异步传输方式"><a href="#异步传输方式" class="headerlink" title="异步传输方式"></a>异步传输方式</h3><p>异步传输方式（Asynchronous Transfer Mode，ATM），一种单一的网络技术，传输实时音频、视频以及文本、电子邮件和图像文件。</p>
 
       
     </div>
@@ -227,6 +1667,9 @@
 
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
 
 
 
@@ -291,7 +1734,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">1</span>
+          <span class="site-state-item-count">41</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

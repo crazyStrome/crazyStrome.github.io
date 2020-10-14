@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"crazystrome.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="链路层和局域网链路层：概述和服务将主机和路由器均称为节点。把沿着通信路径连接相邻节点的通信信道称为链路。为了将一个数据报从源主机传输到目的主机，数据报必须通过端到端路径山高的没段链路传输。在通过特定链路时，传输节点将此数据报封装在链路层帧中，并将该帧发送到链路上；接收节点然后接收该帧并提取出数据报。 链路层提供的服务链路层协议用来在独立的链路上移动数据报。链路层协议定义了链路两端的节点之间交换的分">
+<meta property="og:type" content="article">
+<meta property="og:title" content="crazyStrome的博客">
+<meta property="og:url" content="http://crazystrome.github.io/2020/10/14/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/index.html">
+<meta property="og:site_name" content="crazyStrome的博客">
+<meta property="og:description" content="链路层和局域网链路层：概述和服务将主机和路由器均称为节点。把沿着通信路径连接相邻节点的通信信道称为链路。为了将一个数据报从源主机传输到目的主机，数据报必须通过端到端路径山高的没段链路传输。在通过特定链路时，传输节点将此数据报封装在链路层帧中，并将该帧发送到链路上；接收节点然后接收该帧并提取出数据报。 链路层提供的服务链路层协议用来在独立的链路上移动数据报。链路层协议定义了链路两端的节点之间交换的分">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/04/04/LASi17BzeIb3hND.png">
+<meta property="article:published_time" content="2020-10-14T10:23:20.638Z">
+<meta property="article:modified_time" content="2020-04-05T01:29:19.000Z">
+<meta property="article:author" content="crazyStrome">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/04/04/LASi17BzeIb3hND.png">
+
+<link rel="canonical" href="http://crazystrome.github.io/2020/10/14/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title> | crazyStrome的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">crazyStrome的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/crazyStrome" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://crazystrome.github.io/2020/10/14/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="crazyStrome">
+      <meta itemprop="description" content="啥都写">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="crazyStrome的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 18:23:20" itemprop="dateCreated datePublished" datetime="2020-10-14T18:23:20+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-04-05 09:29:19" itemprop="dateModified" datetime="2020-04-05T09:29:19+08:00">2020-04-05</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="链路层和局域网"><a href="#链路层和局域网" class="headerlink" title="链路层和局域网"></a>链路层和局域网</h1><h2 id="链路层：概述和服务"><a href="#链路层：概述和服务" class="headerlink" title="链路层：概述和服务"></a>链路层：概述和服务</h2><p>将主机和路由器均称为节点。把沿着通信路径连接相邻节点的通信信道称为链路。为了将一个数据报从源主机传输到目的主机，数据报必须通过端到端路径山高的没段链路传输。在通过特定链路时，传输节点将此数据报封装在链路层帧中，并将该帧发送到链路上；接收节点然后接收该帧并提取出数据报。</p>
+<h3 id="链路层提供的服务"><a href="#链路层提供的服务" class="headerlink" title="链路层提供的服务"></a>链路层提供的服务</h3><p><strong>链路层协议</strong>用来在独立的链路上移动数据报。链路层协议定义了链路两端的节点之间交换的分组格式，以及当发送和接收分组时这些节点采取的动作。链路层协议交换的数据单元称为<strong>帧</strong>。每个链路层帧通常封装了一个网络层的数据报。当发送和接收帧时，链路层协议所采取的动作包括差错检测、重传、流量控制和随机接入。链路层协议的例子包括以太网、802.11无限LAN、令牌环和PPP；在很多场合下，ATM也被认为是链路层协议。</p>
+<p>任何链路层的基本服务都是将数据报通过单一通信链路从一个结点移动到相邻节点，所提供的服务细节将随链路层协议从一种进入下一种而改变。链路层协议能够提供的可能服务包括：</p>
+<ul>
+<li>成帧。链路层协议把网络层数据报用链路层帧封装起来。一个帧由一个数据字段和若干个首部字段组成，其中网络层数据报就插在数据字段中。</li>
+<li>链路接入。媒体访问控制协议（Medium Access Control，MAC）规定了帧在链路上传输的规则。</li>
+<li>可靠交付。当链路层协议提供可靠交付服务时，它保证无差错地经链路层移动每个网络层数据报。链路层的可靠交付服务通常是通过确认和重传取得的。</li>
+<li>流量控制。链路每一端的结点都具有有限容量的帧缓存能力。</li>
+<li>差错检测。链路层的差错检测更复杂，并且用硬件实现。</li>
+<li>差错纠正。差错纠正和差错检测类似，区别在于接收方不仅能检测帧中是否引入了差错，而且能够准确的判断差错出现在哪里并纠正。</li>
+<li>半双工和全双工。采用全双工传输时，链路两端的节点可以同时传输分组。采用半双工传输时，一个结点不能同时进行传输和接收。</li>
+</ul>
+<h3 id="链路层在何处实现"><a href="#链路层在何处实现" class="headerlink" title="链路层在何处实现"></a>链路层在何处实现</h3><p>链路层的主体是在网络适配器中实现的，网络适配器也称为网络接口卡。网络适配器的内核是链路层控制器，该控制器通常实现了许多链路层服务的耽搁特定目的的芯片。链路层控制器的许多功能是用硬件实现的。</p>
+<h2 id="差错检测和纠错技术"><a href="#差错检测和纠错技术" class="headerlink" title="差错检测和纠错技术"></a>差错检测和纠错技术</h2><p>比特级差错检测和纠错是链路层提供的两种服务：对从一个节点发送到另一个物理上相邻的节点的链路层帧，检测和纠正其中的比特差错。</p>
+<p><img src="https://i.loli.net/2020/04/04/LASi17BzeIb3hND.png" alt="image-20200404201815455"></p>
+<h3 id="奇偶校验"><a href="#奇偶校验" class="headerlink" title="奇偶校验"></a>奇偶校验</h3><p>假设发送的信息D有d个比特，发送方只需包含一个附加的比特，选择它的值，使得这d+1个比特中1的总数是偶数，这是偶校验方案。如果丢失两个比特的话，就出现偶数个比特差错。可以使用二维奇偶校验方案。</p>
+<p>二维奇偶校验：将D中的d个数据分为i行j列，每行每列都进行一个校验，最后形成i+j+1个校验数。</p>
+<p>接收方检测和纠正差错的能力被称为前向纠错。</p>
+<h3 id="检验和方法"><a href="#检验和方法" class="headerlink" title="检验和方法"></a>检验和方法</h3><p>将数据D中的数据认为是k比特整数序列，将这k比特整数加起来，并用得到的和作为差错检测比特。</p>
+<h3 id="循环冗余检测"><a href="#循环冗余检测" class="headerlink" title="循环冗余检测"></a>循环冗余检测</h3><p>循环冗余检测（Cyclic Redundancy Check，CRC）编码也称为多项式编码（polynomial code），因为该编码能够将要发送的比特串看做是系数为0和1的一个多项式，对比特串的操作被解释为多项式算术。</p>
+<h2 id="多路访问协议"><a href="#多路访问协议" class="headerlink" title="多路访问协议"></a>多路访问协议</h2><p>点对点链路（point-to-point link）是由链路一端的单个发送方和链路另一端的单个接收方组成。</p>
+<p>点对点协议（Point-to-Point Protocol， PPP）和高级数据链路控制（High-level Data Link Control，HDLC）是两种这样的协议。</p>
+<p>广播链路（broadcast link）能够让多个发送和接收节点都连接到相同的、单一的、共享的广播信道上。</p>
+<p>当所有节点同时接到多个帧，即传输的帧在所有的接收方处发生碰撞了，接收节点没有一个可以获得任何有效的传输帧。</p>
+<p>任何的多路访问协议可以分为：信道划分协议、随机接入协议和轮流协议。</p>
+<h3 id="信道划分协议"><a href="#信道划分协议" class="headerlink" title="信道划分协议"></a>信道划分协议</h3><p>时分多路复用（TDM）和频分多路复用（FDM）是两种能够在所有共享信道结点之间用于划分广播信道带宽的技术。</p>
+<p>第三种是码分多址（CDMA）。时分和频分分别为结点分配时隙和频率，而CDMA对每个结点分配一种不同的编码。</p>
+<h3 id="随机接入协议"><a href="#随机接入协议" class="headerlink" title="随机接入协议"></a>随机接入协议</h3><p>当有碰撞时，设计碰撞的每个节点反复重发它的帧，直到该帧不碰撞的通过为止。当一个节点经受一次碰撞时，不必立刻重发该帧而是等待一个随机时延。</p>
+<h3 id="轮流协议"><a href="#轮流协议" class="headerlink" title="轮流协议"></a>轮流协议</h3><p>轮询协议：主节点依次轮询每个节点，让每个节点依次发送帧。</p>
+<p>令牌传递协议：令牌在节点之间传递，如果当前节点持有令牌且有数据帧要发送才能发送，否则向后传递令牌。</p>
+<h3 id="局域网"><a href="#局域网" class="headerlink" title="局域网"></a>局域网</h3><p>第一类局域网（LAN）基于随机接入。第二类LAN基于令牌传递技术组成，包括令牌环和光纤式分布数据接口（FDDI）。</p>
+<p>在令牌环LAN中，当某个节点获得令牌并发送一个帧时，该帧绕着整个环传播，从而创建一个虚拟广播信道。当目的节点接收之后，发送节点将该帧从环中去除，而FDDI是由接收节点去除。</p>
+<h2 id="链路层编址"><a href="#链路层编址" class="headerlink" title="链路层编址"></a>链路层编址</h2><h3 id="MAC地址"><a href="#MAC地址" class="headerlink" title="MAC地址"></a>MAC地址</h3><p>链路层地址为MAC地址，长6字节。IEEE负责MAC地址的分配。</p>
+<p>某适配器要向某些目的适配器发送一个帧时，发送适配器将目的适配器的MAC地址插入到该帧中，然后发送到LAN上。每个适配器都会匹配帧的MAC地址。</p>
+<p>有时某发送适配器的确要让LAN上所有的其他适配器来接收并处理它的帧，发送适配器在该帧的目的地址字段中插入一个特殊的MAC广播地址：FF-FF-FF-FF-FF-FF。</p>
+<h3 id="地址解析协议"><a href="#地址解析协议" class="headerlink" title="地址解析协议"></a>地址解析协议</h3><p>地址解析协议（ARP）将网络层地址和链路层地址进行转换。</p>
+<p>发送数据报时需要提供IP地址和MAC地址。</p>
+<p>DNS为在因特网中的任何地方的主机解析主机名。ARP只为在同一个子网中的节点解析IP地址。</p>
+<p>每个节点的ARP模块都有一个ARP表，这张表包含IP地址到MAC地址的映射关系。</p>
+<h2 id="以太网"><a href="#以太网" class="headerlink" title="以太网"></a>以太网</h2><p>集线器是一种物理设备，它作用于比特而不是帧，放大收到的比特。</p>
+<h3 id="以太网帧结构"><a href="#以太网帧结构" class="headerlink" title="以太网帧结构"></a>以太网帧结构</h3><p>发送适配器在一个以太网帧中封装了一个IP数据报，并把该帧传递到物理层。接收适配器从物理层接收这个帧，提取出IP数据报，并将该IP数据报传递给网络层。以太网帧的字段：</p>
+<ul>
+<li>数据字段。这个字段承载了IP数据报。以太网的最大传输单元（MTU）是1500字节。这意味着如果IP数据报超过1500字节，则主机必须将该数据报分段。数据报的最小长度是46字节。如果IP数据报小于46字节，数据报必须被填充到46字节。当采用填充时传递到网络层的数据包包括IP数据报和填充部分。网络层使用IP数据报首部中的长度字段来去除该填充。</li>
+<li>目的地址。该字段包含目的适配器的MAC地址。当适配器收到一个帧，无论帧中的目的地址是它的MAC地址还是MAC广播地址，都将该帧的数据字段内容传递给网络层。</li>
+<li>源地址。该字段包含帧的源地址</li>
+<li>类型字段（2字节）。该类型字段允许以太网复用多中网络协议。适配器通过该字段得知数据字段中的内容是从哪个网路层协议或者发送到哪个网路层协议的。</li>
+<li>循环冗余检测。使接收适配器检测帧中是否引入了差错。</li>
+<li>前同步码。以太网帧以8个字节的前同步码开始，前七个字节都是10101010，最后一个字节时10101011.前七个字节用于将接收适配器和发送适配器的时钟同步。</li>
+</ul>
+<p>以太网使用基带传输。</p>
+<p>所有的以太网技术都向网络层提供无连接服务。</p>
+<p>所有的以太网技术都向网络层提供不可靠服务。</p>
+<h3 id="CSMA-CD：以太网多路访问协议"><a href="#CSMA-CD：以太网多路访问协议" class="headerlink" title="CSMA/CD：以太网多路访问协议"></a>CSMA/CD：以太网多路访问协议</h3><p>当一个节点通过集线器互联时，该以太网LAN是一个真正的广播LAN，即当某适配器传输一帧时，LAN上所有的适配器都收到该帧。CSMA/CD使用了如下机制：</p>
+<ol>
+<li>适配器可以在任何时刻开始传输</li>
+<li>当一个适配器侦听到有其他适配器在传输，它绝不会传输帧；使用了载波侦听</li>
+<li>一旦传输中的适配器检测到另一个适配器正在传输，就终止它的传输；使用了碰撞检测</li>
+<li>在尝试重传之前，等待一个随机延时，这个时间通常比传输一帧的时间要短</li>
+</ol>
+<p>在一个特定的适配器中，CSMA/CD协议按如下方式工作：</p>
+<ol>
+<li>适配器从网路程得到一个数据报，准备一个以太网帧，并把该帧放到适配器缓存区中。</li>
+<li>如果适配器侦听到信道空闲，它开始传输该帧。</li>
+<li>在传输过程中，适配器监视来自其他适配器的信号能量的出现如果该适配器传输了整个帧，而没有检测到来=来自其他适配器的信号能量，它就完成了该帧的传输。</li>
+<li>如果适配器在传输中检测到来自其他适配器的信号能量，它就停止传输它的帧，而代之以传输一个48比特的阻塞信号。</li>
+<li>在中止以后，适配器进入一个指数后退阶段。然后回到第二步。</li>
+</ol>
+<h3 id="以太网技术"><a href="#以太网技术" class="headerlink" title="以太网技术"></a>以太网技术</h3><h2 id="链路层交换机"><a href="#链路层交换机" class="headerlink" title="链路层交换机"></a>链路层交换机</h2><p>交换机的任务是接收入链路帧并将它们转发到出链路。交换机自身对节点是透明的。</p>
+<h3 id="交换机转发和过滤"><a href="#交换机转发和过滤" class="headerlink" title="交换机转发和过滤"></a>交换机转发和过滤</h3><p>过滤是交换机决定一个帧是应该转发到某个接口还是应当将其丢弃的功能。转发是决定一个帧时应该被导向哪个接口，并把该帧移向该接口的功能交换机的过滤和转发借助于交换机表完成。交换机表的一个表项包括：节点的MAC地址；达到该节点的交换机接口；用于节点的表项放置在表中的时间。交换机转发分组是基于MAC地址而不是IP地址。</p>
+<h3 id="自学习"><a href="#自学习" class="headerlink" title="自学习"></a>自学习</h3><ol>
+<li>交换机表初始为空</li>
+<li>对于在某接口接收到的每个入帧，该交换机在其表中存储：该帧源地址的MAC地址；该帧到达的接口；当前的时间。交换机以这种方式在他的表中记录发送节点所在的LAN网段。</li>
+<li>如果在一段时间（老化期）后，交换机没有接收到以该址作为源地址的帧，就在该表中删除该地址。</li>
+</ol>
+<p>交换机是即插即用设备。交换机也是全双工的。</p>
+<h3 id="链路层交换机的性质"><a href="#链路层交换机的性质" class="headerlink" title="链路层交换机的性质"></a>链路层交换机的性质</h3><p>交换机的优点：</p>
+<ul>
+<li>消除碰撞。</li>
+<li>异质的链路。交换机将链路彼此隔离，LAN中的不同链路能够以不同的速率运行并且能够在不同的媒体上运行。</li>
+<li>管理。</li>
+</ul>
+<h3 id="交换机和路由器的比较"><a href="#交换机和路由器的比较" class="headerlink" title="交换机和路由器的比较"></a>交换机和路由器的比较</h3><p>交换机是即查即用的。交换机还能够具有相对高的分组过滤和转发速率。交换机对于广播风暴不提供任何保护措施。</p>
+<p>路由器对第二层的广播风暴提供了防火墙保护。</p>
+<h2 id="PPP：点对点协议"><a href="#PPP：点对点协议" class="headerlink" title="PPP：点对点协议"></a>PPP：点对点协议</h2><p>PPP通常是住宅主机拨号链路所选择的协议。</p>
+<h2 id="链路虚拟化：网络作为链路层"><a href="#链路虚拟化：网络作为链路层" class="headerlink" title="链路虚拟化：网络作为链路层"></a>链路虚拟化：网络作为链路层</h2><h3 id="异步传输方式"><a href="#异步传输方式" class="headerlink" title="异步传输方式"></a>异步传输方式</h3><p>异步传输方式（Asynchronous Transfer Mode，ATM），一种单一的网络技术，传输实时音频、视频以及文本、电子邮件和图像文件。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/10/14/%E7%BA%BF%E6%80%A7%E8%A1%A8-%E6%95%B0%E7%BB%84/" rel="prev" title="">
+      <i class="fa fa-chevron-left"></i> 
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/14/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E7%BD%91%E7%BB%9C%E5%B1%82/" rel="next" title="">
+       <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91"><span class="nav-number">1.</span> <span class="nav-text">链路层和局域网</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%93%BE%E8%B7%AF%E5%B1%82%EF%BC%9A%E6%A6%82%E8%BF%B0%E5%92%8C%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.1.</span> <span class="nav-text">链路层：概述和服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%93%BE%E8%B7%AF%E5%B1%82%E6%8F%90%E4%BE%9B%E7%9A%84%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.1.1.</span> <span class="nav-text">链路层提供的服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%93%BE%E8%B7%AF%E5%B1%82%E5%9C%A8%E4%BD%95%E5%A4%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.1.2.</span> <span class="nav-text">链路层在何处实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%AE%E9%94%99%E6%A3%80%E6%B5%8B%E5%92%8C%E7%BA%A0%E9%94%99%E6%8A%80%E6%9C%AF"><span class="nav-number">1.2.</span> <span class="nav-text">差错检测和纠错技术</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A5%87%E5%81%B6%E6%A0%A1%E9%AA%8C"><span class="nav-number">1.2.1.</span> <span class="nav-text">奇偶校验</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A3%80%E9%AA%8C%E5%92%8C%E6%96%B9%E6%B3%95"><span class="nav-number">1.2.2.</span> <span class="nav-text">检验和方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E5%86%97%E4%BD%99%E6%A3%80%E6%B5%8B"><span class="nav-number">1.2.3.</span> <span class="nav-text">循环冗余检测</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E8%B7%AF%E8%AE%BF%E9%97%AE%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.3.</span> <span class="nav-text">多路访问协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E9%81%93%E5%88%92%E5%88%86%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.3.1.</span> <span class="nav-text">信道划分协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E6%8E%A5%E5%85%A5%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.3.2.</span> <span class="nav-text">随机接入协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AE%E6%B5%81%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.3.3.</span> <span class="nav-text">轮流协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%80%E5%9F%9F%E7%BD%91"><span class="nav-number">1.3.4.</span> <span class="nav-text">局域网</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%93%BE%E8%B7%AF%E5%B1%82%E7%BC%96%E5%9D%80"><span class="nav-number">1.4.</span> <span class="nav-text">链路层编址</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MAC%E5%9C%B0%E5%9D%80"><span class="nav-number">1.4.1.</span> <span class="nav-text">MAC地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E8%A7%A3%E6%9E%90%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.4.2.</span> <span class="nav-text">地址解析协议</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A5%E5%A4%AA%E7%BD%91"><span class="nav-number">1.5.</span> <span class="nav-text">以太网</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A5%E5%A4%AA%E7%BD%91%E5%B8%A7%E7%BB%93%E6%9E%84"><span class="nav-number">1.5.1.</span> <span class="nav-text">以太网帧结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CSMA-CD%EF%BC%9A%E4%BB%A5%E5%A4%AA%E7%BD%91%E5%A4%9A%E8%B7%AF%E8%AE%BF%E9%97%AE%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.5.2.</span> <span class="nav-text">CSMA&#x2F;CD：以太网多路访问协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A5%E5%A4%AA%E7%BD%91%E6%8A%80%E6%9C%AF"><span class="nav-number">1.5.3.</span> <span class="nav-text">以太网技术</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%93%BE%E8%B7%AF%E5%B1%82%E4%BA%A4%E6%8D%A2%E6%9C%BA"><span class="nav-number">1.6.</span> <span class="nav-text">链路层交换机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%A4%E6%8D%A2%E6%9C%BA%E8%BD%AC%E5%8F%91%E5%92%8C%E8%BF%87%E6%BB%A4"><span class="nav-number">1.6.1.</span> <span class="nav-text">交换机转发和过滤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%AD%A6%E4%B9%A0"><span class="nav-number">1.6.2.</span> <span class="nav-text">自学习</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%93%BE%E8%B7%AF%E5%B1%82%E4%BA%A4%E6%8D%A2%E6%9C%BA%E7%9A%84%E6%80%A7%E8%B4%A8"><span class="nav-number">1.6.3.</span> <span class="nav-text">链路层交换机的性质</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%A4%E6%8D%A2%E6%9C%BA%E5%92%8C%E8%B7%AF%E7%94%B1%E5%99%A8%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">1.6.4.</span> <span class="nav-text">交换机和路由器的比较</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PPP%EF%BC%9A%E7%82%B9%E5%AF%B9%E7%82%B9%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.7.</span> <span class="nav-text">PPP：点对点协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%93%BE%E8%B7%AF%E8%99%9A%E6%8B%9F%E5%8C%96%EF%BC%9A%E7%BD%91%E7%BB%9C%E4%BD%9C%E4%B8%BA%E9%93%BE%E8%B7%AF%E5%B1%82"><span class="nav-number">1.8.</span> <span class="nav-text">链路虚拟化：网络作为链路层</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5%E4%BC%A0%E8%BE%93%E6%96%B9%E5%BC%8F"><span class="nav-number">1.8.1.</span> <span class="nav-text">异步传输方式</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">crazyStrome</p>
+  <div class="site-description" itemprop="description">啥都写</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">null </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">crazyStrome</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+    </div>
+</body>
+</html>
