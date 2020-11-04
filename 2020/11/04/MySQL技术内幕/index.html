@@ -1,0 +1,348 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>crazyStrome的博客 | crazyStrome的博客</title><meta name="author" content="crazyStrome"><meta name="copyright" content="crazyStrome"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="[TOC] 1.  MySQL体系结构和存储引擎1.1.  定义数据库和实例数据库：物理操作系统文件或其他形式文件类型的集合。 实例：MySQL数据库由后台线程以及一个共享内存区组成。共享内存可以被运行的后台线程所共享。数据库实例才是真正用于操作数据库文件的。 MySQL被设计成一个单进程多线程架构的数据库。MySQL数据库实例在系统上的表现就是一个进程。 1.2.  MySQL体系结构从概念上来">
+<meta property="og:type" content="article">
+<meta property="og:title" content="crazyStrome的博客">
+<meta property="og:url" content="http://crazystrome.github.io/2020/11/04/MySQL%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/index.html">
+<meta property="og:site_name" content="crazyStrome的博客">
+<meta property="og:description" content="[TOC] 1.  MySQL体系结构和存储引擎1.1.  定义数据库和实例数据库：物理操作系统文件或其他形式文件类型的集合。 实例：MySQL数据库由后台线程以及一个共享内存区组成。共享内存可以被运行的后台线程所共享。数据库实例才是真正用于操作数据库文件的。 MySQL被设计成一个单进程多线程架构的数据库。MySQL数据库实例在系统上的表现就是一个进程。 1.2.  MySQL体系结构从概念上来">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg">
+<meta property="article:published_time" content="2020-11-04T10:24:59.200Z">
+<meta property="article:modified_time" content="2020-05-06T03:51:35.000Z">
+<meta property="article:author" content="crazyStrome">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://crazystrome.github.io/2020/11/04/MySQL%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.2.0',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  ClickShowText: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-05-06 11:51:35'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {
+  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }
+})()</script><meta name="generator" content="Hexo 5.2.0"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/null" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">40</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">2</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">1</div></a></div></div></div><hr/></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-MySQL%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E5%92%8C%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="toc-number">1.</span> <span class="toc-text">1.  MySQL体系结构和存储引擎</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%BA%93%E5%92%8C%E5%AE%9E%E4%BE%8B"><span class="toc-number">1.1.</span> <span class="toc-text">1.1.  定义数据库和实例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-MySQL%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><span class="toc-number">1.2.</span> <span class="toc-text">1.2.  MySQL体系结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-MySQL%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="toc-number">1.3.</span> <span class="toc-text">1.3.  MySQL存储引擎</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-1-InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="toc-number">1.3.1.</span> <span class="toc-text">1.3.1.  InnoDB存储引擎</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-2-MyISAM%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="toc-number">1.3.2.</span> <span class="toc-text">1.3.2.  MyISAM存储引擎</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-%E5%90%84%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E4%B9%8B%E9%97%B4%E7%9A%84%E6%AF%94%E8%BE%83"><span class="toc-number">1.4.</span> <span class="toc-text">1.4.  各存储引擎之间的比较</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-5-%E8%BF%9E%E6%8E%A5MySQL"><span class="toc-number">1.5.</span> <span class="toc-text">1.5.  连接MySQL</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="toc-number">2.</span> <span class="toc-text">2.  InnoDB存储引擎</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-1-%E5%90%8E%E5%8F%B0%E7%BA%BF%E7%A8%8B"><span class="toc-number">2.0.1.</span> <span class="toc-text">2.3.1.  后台线程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-2-%E5%86%85%E5%AD%98"><span class="toc-number">2.0.2.</span> <span class="toc-text">2.3.2.  内存</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-Checkpoint%E6%8A%80%E6%9C%AF"><span class="toc-number">2.1.</span> <span class="toc-text">2.4.  Checkpoint技术</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-Master-Thread-%E5%B7%A5%E4%BD%9C%E6%96%B9%E5%BC%8F"><span class="toc-number">2.2.</span> <span class="toc-text">2.5.  Master Thread 工作方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-1-InnoDB-1-0-x%E7%89%88%E6%9C%AC%E4%B9%8B%E5%89%8D%E7%9A%84Master-Thread"><span class="toc-number">2.2.1.</span> <span class="toc-text">2.5.1.  InnoDB 1.0.x版本之前的Master Thread</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-2-InnoDB1-2-x%E7%89%88%E6%9C%AC%E4%B9%8B%E5%89%8D%E7%9A%84Master-Thread"><span class="toc-number">2.2.2.</span> <span class="toc-text">2.5.2.  InnoDB1.2.x版本之前的Master Thread</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-6-InnoDB%E7%9A%84%E5%85%B3%E9%94%AE%E7%89%B9%E6%80%A7"><span class="toc-number">2.3.</span> <span class="toc-text">2.6.  InnoDB的关键特性</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-1-%E6%8F%92%E5%85%A5%E7%BC%93%E5%86%B2"><span class="toc-number">2.3.1.</span> <span class="toc-text">2.6.1.  插入缓冲</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-2-%E4%B8%A4%E6%AC%A1%E5%86%99"><span class="toc-number">2.3.2.</span> <span class="toc-text">2.6.2  两次写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-3-%E8%87%AA%E9%80%82%E5%BA%94%E5%93%88%E5%B8%8C%E7%B4%A2%E5%BC%95"><span class="toc-number">2.3.3.</span> <span class="toc-text">2.6.3  自适应哈希索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-4-%E5%BC%82%E6%AD%A5IO"><span class="toc-number">2.3.4.</span> <span class="toc-text">2.6.4  异步IO</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-5-%E5%88%B7%E6%96%B0%E9%82%BB%E6%8E%A5%E9%A1%B5"><span class="toc-number">2.3.5.</span> <span class="toc-text">2.6.5  刷新邻接页</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E7%B4%A2%E5%BC%95%E4%B8%8E%E7%AE%97%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">5  索引与算法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E7%B4%A2%E5%BC%95%E6%A6%82%E8%BF%B0"><span class="toc-number">3.1.</span> <span class="toc-text">5.1  InnoDB存储引擎索引概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95"><span class="toc-number">3.2.</span> <span class="toc-text">5.2  数据结构与算法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-1-%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE%E6%B3%95"><span class="toc-number">3.2.1.</span> <span class="toc-text">5.2.1  二分查找法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-2-%E4%BA%8C%E5%8F%89%E6%9F%A5%E6%89%BE%E6%A0%91%E5%92%8C%E5%B9%B3%E8%A1%A1%E4%BA%8C%E5%8F%89%E6%A0%91"><span class="toc-number">3.2.2.</span> <span class="toc-text">5.2.2  二叉查找树和平衡二叉树</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-3-B-%E6%A0%91"><span class="toc-number">3.3.</span> <span class="toc-text">5.3  B+树</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-4-B-%E6%A0%91%E7%B4%A2%E5%BC%95"><span class="toc-number">3.4.</span> <span class="toc-text">5.4  B+树索引</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-1-%E8%81%9A%E9%9B%86%E7%B4%A2%E5%BC%95"><span class="toc-number">3.4.1.</span> <span class="toc-text">5.4.1  聚集索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-2-%E8%BE%85%E5%8A%A9%E7%B4%A2%E5%BC%95"><span class="toc-number">3.4.2.</span> <span class="toc-text">5.4.2  辅助索引</span></a></li></ol></li></ol></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">crazyStrome的博客</a></span><span id="menus"><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">无题</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-11-04T10:24:59.200Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-05-06T03:51:35.000Z" title="更新于 2020-05-06 11:51:35">2020-05-06</time></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><p>[TOC]</p>
+<h1 id="1-MySQL体系结构和存储引擎"><a href="#1-MySQL体系结构和存储引擎" class="headerlink" title="1.  MySQL体系结构和存储引擎"></a>1.  MySQL体系结构和存储引擎</h1><h2 id="1-1-定义数据库和实例"><a href="#1-1-定义数据库和实例" class="headerlink" title="1.1.  定义数据库和实例"></a>1.1.  定义数据库和实例</h2><p>数据库：物理操作系统文件或其他形式文件类型的集合。</p>
+<p>实例：MySQL数据库由后台线程以及一个共享内存区组成。共享内存可以被运行的后台线程所共享。数据库实例才是真正用于操作数据库文件的。</p>
+<p>MySQL被设计成一个单进程多线程架构的数据库。MySQL数据库实例在系统上的表现就是一个进程。</p>
+<h2 id="1-2-MySQL体系结构"><a href="#1-2-MySQL体系结构" class="headerlink" title="1.2.  MySQL体系结构"></a>1.2.  MySQL体系结构</h2><p>从概念上来说，数据库是文件的集合，是依照某种数据模型组织起来并存放于二级存储器中的数据集合：数据库实例是程序，是位于用户与操作系统之间的一层数据管理软件，用户对数据库数据的任何操作，包括数据库定义、数据库查询、数据维护、数据库运行控制等都是在数据库实例下进行的，应用程序只有通过数据库实例才能和数据库打交道。</p>
+<p>数据库是由一个个文件组成（一般来说都是二进制文件），要对这些文件执行诸如SELECT、INSERT、UPDATE和DELETE之类的操作是不能通过简单的操作文件来更改数据库的内容，需要通过数据库实例来完成对数据库的操作。</p>
+<p><img src="https://i.loli.net/2020/04/29/UxIWHj1GQEXgSaq.png"></p>
+<p>MySQL由一下几部分组成：</p>
+<ul>
+<li>连接池组件</li>
+<li>管理服务和工具组件</li>
+<li>SQL接口组件</li>
+<li>查询分析器组件</li>
+<li>优化器组件</li>
+<li>缓冲组件</li>
+<li>插件式存储引擎</li>
+<li>物理文件</li>
+</ul>
+<p>MySQL数据库区别于其他数据库的最重要的一个特点就是其插件式的表存储引擎。</p>
+<p>存储引擎是基于表的，而不是数据库。</p>
+<h2 id="1-3-MySQL存储引擎"><a href="#1-3-MySQL存储引擎" class="headerlink" title="1.3.  MySQL存储引擎"></a>1.3.  MySQL存储引擎</h2><p>存储引擎是MySQL区别于其他数据库的一个重要特性。存储引擎的好处是，每个存储引擎都有各自的特点，能够根据具体的应用建立不同存储引擎表。</p>
+<h3 id="1-3-1-InnoDB存储引擎"><a href="#1-3-1-InnoDB存储引擎" class="headerlink" title="1.3.1.  InnoDB存储引擎"></a>1.3.1.  InnoDB存储引擎</h3><p>InnoDB存储引擎支持事务，其设计目标主要面向在线事务处理（OLTP）的应用，其特点是行锁设计、支持外键，并支持类似于Oracle的非锁定读，即默认读取操作不会产生锁。</p>
+<p>InnoDB存储引擎将数据放在一个逻辑的表空间中，这个表空间就像黑盒一样由InnoDB存储引擎自身进行管理。</p>
+<p>InnoDB使用多版本并发控制来获得高并发性，并且实现了SQL标准的四种隔离级别，默认为REPEATABLE级别。同时，使用一种称为next-key locking的策略来避免幻读现象的产生。除此之外，InnoDB存储引擎还提供了插入缓冲、二次写、自适应哈希索引、预读等高性能和高可用的功能。</p>
+<p>对于表中数据的存储，InnoDB存储引擎使用了聚集的方式，因此每张表的存储都是按照主键的顺序进行存放。如果没有显示地在表定义的时候指定主键，InnoDB存储引擎会为每一行生成一个6字节的ROWID，并以此作为主键。</p>
+<h3 id="1-3-2-MyISAM存储引擎"><a href="#1-3-2-MyISAM存储引擎" class="headerlink" title="1.3.2.  MyISAM存储引擎"></a>1.3.2.  MyISAM存储引擎</h3><p>MyISAM存储引擎不支持事务、表锁设计，支持全文索引，主要面向一些OLAP数据库应用。数据库系统与文件系统很大的一个不同之处在与对事务的支持，然而MyISAM存储引擎是不支持事务的。其缓冲池只缓存索引文件，而不缓冲数据文件。</p>
+<p>MyISAM存储引擎由MYD和MYI组成，MYD用来存放数据文件，MYI用来存放索引文件。可以通过使用myisampack工具进一步压缩数据。</p>
+<h2 id="1-4-各存储引擎之间的比较"><a href="#1-4-各存储引擎之间的比较" class="headerlink" title="1.4.  各存储引擎之间的比较"></a>1.4.  各存储引擎之间的比较</h2><p><img src="https://i.loli.net/2020/04/29/yCMnVu2adWxROtv.png"></p>
+<h2 id="1-5-连接MySQL"><a href="#1-5-连接MySQL" class="headerlink" title="1.5.  连接MySQL"></a>1.5.  连接MySQL</h2><p>连接MySQL操作是一个连接进程和MySQL数据库实例进行通信。常用的进程通信方式有管道、命名管道、共享内存、套接字、消息队列、信号量。</p>
+<h1 id="2-InnoDB存储引擎"><a href="#2-InnoDB存储引擎" class="headerlink" title="2.  InnoDB存储引擎"></a>2.  InnoDB存储引擎</h1><p><img src="https://i.loli.net/2020/04/29/am2NSvtTfnhgBdU.png"></p>
+<p>InnoDB存储引擎由多个内存块，可以认为这些内存块组成了一个大的内存池，负责如下工作：</p>
+<ul>
+<li>维护所有进程/线程需要访问的多个内部数据结构</li>
+<li>缓存磁盘上的数据，方便快速地读取，同时在对磁盘文件的数据修改之前在这里缓存</li>
+<li>重做日志（redo log）缓冲</li>
+<li>。。。。</li>
+</ul>
+<p>后台线程的主要作用是负责刷新内存池的数据，保证缓存池中的内存缓存是最近的数据。此外将已修改的数据文件刷新到磁盘文件，同时保证在数据库发生异常的情况下，InnoDB能恢复到正常状态。</p>
+<h3 id="2-3-1-后台线程"><a href="#2-3-1-后台线程" class="headerlink" title="2.3.1.  后台线程"></a>2.3.1.  后台线程</h3><p>InnoDB是多线程的模型，因此后台有多个不同的后台线程，负责处理不同的任务。</p>
+<ol>
+<li>Master Thread</li>
+</ol>
+<p>Master Thread是一个非常核心的后台线程，主要负责将缓冲池的数据异步刷新到磁盘，保证数据的一致性，包括脏页的刷新、合并插入缓冲、UNDO页的回收等。</p>
+<ol start="2">
+<li>IO Thread</li>
+</ol>
+<p>在InnoDB中使用了大量的AIO来处理写IO请求，这样可以极大提高数据库的性能。而IO Thread的工作主要是负责这些IO请求的回调处理。</p>
+<ol start="3">
+<li>Purge Thread</li>
+</ol>
+<p>事务被提交后，其所使用的undolog可能不再需要，因此需要Purge Thread来回收已经使用并分配的undo页。</p>
+<ol start="4">
+<li>Page Cleaner Thread</li>
+</ol>
+<p>Page Cleaner Thread作用是将之前版本中脏页的刷新操作都放入到单独的线程中来完成。其目的是为了减轻元Master Thread的工作以及对于用户查询线程的阻塞，进一步提高InnoDB存储引擎的性能。</p>
+<h3 id="2-3-2-内存"><a href="#2-3-2-内存" class="headerlink" title="2.3.2.  内存"></a>2.3.2.  内存</h3><p><img src="upload%5Cimage-20200429172042048.png" alt="image-20200429172042048"></p>
+<ol>
+<li>缓冲池</li>
+</ol>
+<p>InnoDB是基于磁盘存储的，并将其中的记录按照页的方式进行管理。基于磁盘的数据库系统通常使用缓冲池技术来提高数据库的整体性能。</p>
+<p>缓冲池其实就是一块内存区域，通过内存的速度来弥补磁盘速度较慢对数据库性能的影响。在数据库中进行读取页的操作，首先将从磁盘读到的页存放在缓冲池中，这个过程称为将页“FIX”在缓冲池中。下一次再读相同的页时，首先判断该页是否在缓冲池中。若在缓冲池中，称该页在缓冲池中被命中，直接读取该页。否则，读取磁盘上的页。</p>
+<p>对于数据库中页的修改操作，首先修改在缓冲池中的页，然后再以一定的频率刷新到磁盘中。这里需要注意的是，页从缓冲池刷新回磁盘的操作并不是在每次页发生更新时触发，而是通过一种称为Checkpoint的机制刷新回磁盘。</p>
+<p>缓冲池中缓存的数据页类型有：索引页、数据页、undo页、插入缓冲、自适应哈希索引、InnoDB存储的锁信息、数据字典信息等。</p>
+<ol start="2">
+<li>LRU List、Free List和Flush List</li>
+</ol>
+<p>数据库的缓冲池是通过LRU（Least Recent Used，最近最少使用）算法来进行管理的，即最频繁使用的页在LRU列表的前端，而最少使用的页在LRU列表的尾端。当缓冲池不能存放新读取到的页时，将首先释放LRU列表中尾端的页。</p>
+<p>InnoDB对传统的LRU算法做了一些优化，在InnoDB的存储引擎中，LRU列表还加入了midpoint位置。新读取到的页，虽然是最新访问的页，但并不是直接放入到LRU列表的首部，而是放入到LRU列表的midpoint位置。这个算法在InnoDB下成为midpoint insertion strategy。在默认配置下，该位置在LRU列表长度的5/8处。</p>
+<p>在InnoDB中，midpoint之后的列表成为old列表，之前的列表成为new列表。可以认为new列表都是活跃的数据。</p>
+<p>如果直接将读取到的页放入到LRU的首部，那么某些SQL操作可能会使缓冲池中的页被刷新出，从而影响缓冲池效率。常见的操作为索引或者数据的扫描操作。这类操作会访问许多页，这些页可能只是在此次查询操作中需要，并不是活跃的热点数据。如果页被放入到LRU列表的首部，那么非常可能将所需要的热点数据页从LRU列表中移除，而在下一次需要读取该页时，InnoDB可能需要再次访问磁盘。</p>
+<p>为了解决这个问题，InnoDB引入了innodb_old_blocks_time来进一步管理LRU列表。用于表示页读取到mid位置后需要等待多久才会被放入到LRU列表的热端。</p>
+<p>LRU用来管理已经读取的页，当数据库刚启动时，LRU列表时空的，即没有任何的页。这时，页都存放在free列表中。当需要从缓冲池中分页时，首先从Free列表中查找是否有可用的空闲页，若有，则将改页从free列表中删除，放入到LRU列表中。否则，根据LRU算法，淘汰LRU列表末尾的页，将该内存空间分配给新的页。当页从LRU列表的old部分加入到new部分时，称此时发生的操作为page made young，而因为innodb_old_blocks_time的设置而导致页没有从old部分移动到new部分的操作称为page not made young。可以通过<code>SHOW ENGINE INNODB STATUS</code>来观察LRU列表以及Free列表的使用情况和运行状态。</p>
+<ol start="3">
+<li>重做日志缓冲</li>
+</ol>
+<p>InnoDB首先将重做日志信息放入到这个缓冲区，然后按照一定频率将其刷新到重做日志文件。重做日志缓冲一般不需要设置得很大，因为一般情况下每一秒钟会将重做日志缓冲刷新到日志文件，因此用户只需要保证每秒产生的事务量在这个缓冲大小之内即可。</p>
+<ol start="4">
+<li>额外的内存池</li>
+</ol>
+<p>在InnoDB中，对内存的管理是通过内存堆进行的。在对一些数据结构本身的内存进行分配时，需要从额外的内存池中进行申请，当该区域的内存不够时，会从缓冲池进行申请。</p>
+<h2 id="2-4-Checkpoint技术"><a href="#2-4-Checkpoint技术" class="headerlink" title="2.4.  Checkpoint技术"></a>2.4.  Checkpoint技术</h2><p>如果在从缓冲池中将页的新版本刷新到磁盘时发生了宕机，那么数据就不能恢复了。为了避免发生数据丢失的问题，当前事务数据库系统普遍采用了Write Ahead Log策略，即当事务提交时，先写重做日志，再修改页。当由于宕机而导致数据丢失时，通过重做日志来完成数据的恢复。这也是ACID中D的要求。</p>
+<p>Checkpoint技术的目的是解决一下问题：</p>
+<ul>
+<li>缩短数据库的恢复时间</li>
+<li>缓冲池不够用时，将脏页刷新到磁盘</li>
+<li>重做日志不可用时，刷新脏页</li>
+</ul>
+<p>当数据库发生宕机时，数据库不需要重做所有日志，因为checkpoint之前的页都已经刷新回磁盘。所以数据库只需对checkpoint后的重做日志进行恢复。</p>
+<p>当缓冲池不够用时，根据LRU算法会溢出最近最少使用的页，若此页为脏页，那么需要强制执行checkpoint，将脏页也就是页的新版本刷新回磁盘。</p>
+<p>InnoDB是通过LSN（Log Sequence Number）来标记版本的。LSN是8字节的数字。每个页有LSN，重做日志也有LSN，Checkpoint也有LSN。</p>
+<p>在InnoDB中，有两种Checkpoint，分别为：</p>
+<ul>
+<li>Sharp Checkpoint</li>
+<li>Fuzzy Checkpoint</li>
+</ul>
+<p>Sharp Checkpoint发生在数据库关闭时将所有的脏页都刷新回磁盘。</p>
+<p>InnoDB内部使用Fuzzy Checkpoint进行页的刷新，即只刷新一部分脏页，而不是刷新所有的脏页回磁盘。</p>
+<p>在InnoDB中可能发生如下几种情况的Fuzzy Checkpoint：</p>
+<ul>
+<li>Master Thread Checkpoint</li>
+<li>FLUSH_LRU_LIST Checkpoint</li>
+<li>Async/Sync Flush Checkpoint</li>
+<li>Dirty Page too much Checkpoint</li>
+</ul>
+<p>对于Master Thread发生的Checkpoint。差不多以每十秒或者每一秒的速度从缓冲池的脏页列表中刷新一定比例的页回磁盘。这个过程是异步的，即此时的InnoDB存储引擎可以进行其他操作，用户查询线程不会阻塞。</p>
+<p>FLUSH_LRU_LIST Checkpoint是因为InnoDB需要保证LRU列表中需要有差不多100个空闲页可以使用。</p>
+<p>Async/Sync Flush Checkpoint指的是重做日志文件不可用的情况，这是需要强制将一些页刷新回磁盘，而此时脏页是从脏页列表中选取的。</p>
+<p>Dirty Page too much，即脏页的数量太多，导致InnoDB强制进行Checkpoint。</p>
+<h2 id="2-5-Master-Thread-工作方式"><a href="#2-5-Master-Thread-工作方式" class="headerlink" title="2.5.  Master Thread 工作方式"></a>2.5.  Master Thread 工作方式</h2><p>InnoDB的主要工作都是在一个单独的后台线程Master Thread中完成的。</p>
+<h3 id="2-5-1-InnoDB-1-0-x版本之前的Master-Thread"><a href="#2-5-1-InnoDB-1-0-x版本之前的Master-Thread" class="headerlink" title="2.5.1.  InnoDB 1.0.x版本之前的Master Thread"></a>2.5.1.  InnoDB 1.0.x版本之前的Master Thread</h3><p>Master Thread具有最高的线程优先级别。其内部由多个循环组成：主循环（Loop）、后台循环（Backgroup loop）、刷新循环（flush loop）、暂停循环（suspend loop）。Master Thread会根据数据库运行的状态在loop、background loop、flush loop和suspend loop中进行切换。</p>
+<p>loop称为主循环，大多数操作是在这个循环中。其中有两大部分的操作–每秒钟的操作和每十秒钟的操作。</p>
+<p>每秒一次的操作包括：</p>
+<ul>
+<li>日志缓冲刷新到磁盘，即使这个事务还没有提交</li>
+<li>合并插入缓冲</li>
+<li>之多刷新100个InnoDB的缓冲池中的脏页到磁盘</li>
+<li>如果当前没有用户活动，则切换到background loop</li>
+</ul>
+<p>每十秒的操作包括：</p>
+<ul>
+<li>刷新100个脏页到磁盘</li>
+<li>合并至多五个插入缓冲</li>
+<li>将日志缓冲刷新到磁盘</li>
+<li>删除无用的Undo页</li>
+<li>刷新100个或者10个脏页到磁盘</li>
+</ul>
+<p>若当前没有用户活动或者数据库关闭，就会切换到background loop。执行以下操作：</p>
+<ul>
+<li>删除无用的Undo页</li>
+<li>合并20个插入缓冲</li>
+<li>跳回到主循环</li>
+<li>不断刷新100个页直到符合条件</li>
+</ul>
+<p>如果flush loop没有事情做，InnoDB引擎会切换到suspend loop，将Master Thread挂起，等待事件的发生。若用户启用了InnoDB，却没有任何InnoDB的表使用，那么Master Thread总是处于挂起的状态。</p>
+<h3 id="2-5-2-InnoDB1-2-x版本之前的Master-Thread"><a href="#2-5-2-InnoDB1-2-x版本之前的Master-Thread" class="headerlink" title="2.5.2.  InnoDB1.2.x版本之前的Master Thread"></a>2.5.2.  InnoDB1.2.x版本之前的Master Thread</h3><p>提高磁盘的IO</p>
+<h2 id="2-6-InnoDB的关键特性"><a href="#2-6-InnoDB的关键特性" class="headerlink" title="2.6.  InnoDB的关键特性"></a>2.6.  InnoDB的关键特性</h2><p>InnoDB的关键特性包括：</p>
+<ul>
+<li>插入缓冲</li>
+<li>两次写</li>
+<li>自适应哈希索引</li>
+<li>异步IO</li>
+<li>刷新邻接页</li>
+</ul>
+<h3 id="2-6-1-插入缓冲"><a href="#2-6-1-插入缓冲" class="headerlink" title="2.6.1.  插入缓冲"></a>2.6.1.  插入缓冲</h3><ol>
+<li>Insert Buffer</li>
+</ol>
+<p>Insert Buffer和数据页一样，也是物理页的一个组成部分。</p>
+<p>插入聚集索引一般是顺序的，不需要磁盘的随机读取。</p>
+<p>当一张表上有非聚集的辅助索引时，在进行插入操作时，数据页的存放还是按主键进行顺序存放的，但是对于非聚集索引叶子节点的插入不再是顺序的了，需要离散地访问非聚集索引页，由于随机读取的存在而导致了插入操作性能下降。这是因为B+树的特性决定了非聚集索引插入的离散性。</p>
+<p>在InnoDB中使用了Insert Buffer，对于非聚集索引的插入或者更新操作，不是每一次直接插入到索引页中，而是先判断插入的非聚集索引页是否在缓冲池中，若在，则直接插入；若不在，则先放入到一个Insert Buffer对象中，好像在欺骗数据库这个非聚集的索引已经插到了叶子节点中，而实际没有，只是存放在另一个位置。然后再以一定的频率和情况进行Insert Buffer和辅助索引页子节点的merge操作。</p>
+<p>使用Insert Buffer需要满足一下两个条件：</p>
+<ul>
+<li>索引是辅助索引</li>
+<li>索引不是唯一的</li>
+</ul>
+<ol start="2">
+<li>Change Buffer</li>
+</ol>
+<p>InnoDB可以对DML操作-INSERT、DELETE、UPDATE都进行缓冲，分别是：Insert Buffer、Delete Buffer、Purge Buffer。</p>
+<ol start="3">
+<li>Insert Buffer的内部实现</li>
+</ol>
+<p>Insert Buffer的数据结构是一颗B+树。非叶子节点存放的是查询的search key。</p>
+<p><img src="https://i.loli.net/2020/05/02/QA2GYbDgZsjN9Rm.png"></p>
+<p>search key一共占用9个字节，其中space表示插入记录所在表的表空间id，在InnoDB中，每个表有一个唯一的space id，可以通过space id查询得知是哪张表。space占用4个字节。marker占用1字节，它使用来兼容老版本的Insert Buffer。offset表示所在页的偏移量，占用4个字节。</p>
+<ol start="4">
+<li>Merge Insert Buffer</li>
+</ol>
+<p>Merge Insert Buffer的操作可能发生在以下几种情况下：</p>
+<ul>
+<li>辅助索引页被读取到缓冲池</li>
+<li>Insert Buffer Bitmap页追踪到该辅助索引页已无可用空间</li>
+<li>Master Thread</li>
+</ul>
+<h3 id="2-6-2-两次写"><a href="#2-6-2-两次写" class="headerlink" title="2.6.2  两次写"></a>2.6.2  两次写</h3><p>doublewrite给InnoDB带来数据页的可靠性。</p>
+<p>当发生数据库宕机时，存储引擎正在写入某个页到表中，而这个页只写了一部分，这种情况称为部分写失效。</p>
+<p>在应用重做日志的时候，需要一个页的副本，当写入时效时，先通过页的副本来还原该页，再进行重做，这就是两次写。</p>
+<h3 id="2-6-3-自适应哈希索引"><a href="#2-6-3-自适应哈希索引" class="headerlink" title="2.6.3  自适应哈希索引"></a>2.6.3  自适应哈希索引</h3><p>哈希的查找时间复杂度为o(1)。</p>
+<p>InnoDB会监控对表上的各索引页的查询。如果观察到建立哈希索引可以带来速度提升，则建立哈希索引，称之为自适应哈希索引（Adaptive Hash Index，AHI）。AHI是通过缓冲池的B+树页构造而来的，因此建立的速度很快，而且不需要对整张表建立哈希索引。InnoDB会根据访问的频率和模式来自动地为某些热点页建立哈希索引。</p>
+<h3 id="2-6-4-异步IO"><a href="#2-6-4-异步IO" class="headerlink" title="2.6.4  异步IO"></a>2.6.4  异步IO</h3><p>AIO可以同时发出多个IO请求。</p>
+<p>AIO可以进行IO merge操作，就是把多个IO合并成一个IO，这样可以提高IOPS的性能。</p>
+<h3 id="2-6-5-刷新邻接页"><a href="#2-6-5-刷新邻接页" class="headerlink" title="2.6.5  刷新邻接页"></a>2.6.5  刷新邻接页</h3><p>当刷新一个脏页时，InnoDB会检测该页所在区的所有页，如果是脏页，那么一起刷新。</p>
+<h1 id="5-索引与算法"><a href="#5-索引与算法" class="headerlink" title="5  索引与算法"></a>5  索引与算法</h1><h2 id="5-1-InnoDB存储引擎索引概述"><a href="#5-1-InnoDB存储引擎索引概述" class="headerlink" title="5.1  InnoDB存储引擎索引概述"></a>5.1  InnoDB存储引擎索引概述</h2><p>InnoDB支持一下几种常见的索引：</p>
+<ul>
+<li>B+索引</li>
+<li>全文索引</li>
+<li>哈希索引</li>
+</ul>
+<p>InnoDB支持的哈希索引是自适应的，InnoDB存储引擎会根据表的使用情况自动生成哈希索引，不能人为干预是否在一张表中生成哈希索引。</p>
+<p>B+树索引的构造类似于二叉树，根据键值快速找到数据。</p>
+<p>B+树索引并不能找到一个给定键值的具体行。B+树索引能找到的只是被查找数据航所在的页，然后通过数据库把页读入到内存，再在内存中进行查找，最后得到要查找的数据。</p>
+<h2 id="5-2-数据结构与算法"><a href="#5-2-数据结构与算法" class="headerlink" title="5.2  数据结构与算法"></a>5.2  数据结构与算法</h2><h3 id="5-2-1-二分查找法"><a href="#5-2-1-二分查找法" class="headerlink" title="5.2.1  二分查找法"></a>5.2.1  二分查找法</h3><p>将记录按有序化排列，在查找过程中采用跳跃式查找，即先以有序数列的中点位置为比较对象，如果要找的元素值小于该中点元素，则将待查序列缩小为左半部分，否则为右半部分。通过一次查找，将查找区间缩小一半。</p>
+<h3 id="5-2-2-二叉查找树和平衡二叉树"><a href="#5-2-2-二叉查找树和平衡二叉树" class="headerlink" title="5.2.2  二叉查找树和平衡二叉树"></a>5.2.2  二叉查找树和平衡二叉树</h3><p>当二叉查找树单边增长时，可以使用平衡二叉树。</p>
+<p>平衡二叉树满足任何节点的两个子树的高度最大差为1.</p>
+<p>平衡二叉树的查询速度很快，但是维护一颗平衡二叉树的代价很大，需要进行多次的旋转来实现。</p>
+<h2 id="5-3-B-树"><a href="#5-3-B-树" class="headerlink" title="5.3  B+树"></a>5.3  B+树</h2><p>B+树是为磁盘或其他直接存取辅助设备设计的平衡查找树。</p>
+<h2 id="5-4-B-树索引"><a href="#5-4-B-树索引" class="headerlink" title="5.4  B+树索引"></a>5.4  B+树索引</h2><p>数据库中的B+树索引分为聚集索引和辅助索引，叶子节点存放所有数据。聚集索引和辅助索引不同的是，叶子节点存放的是否是一整行的信息。</p>
+<h3 id="5-4-1-聚集索引"><a href="#5-4-1-聚集索引" class="headerlink" title="5.4.1  聚集索引"></a>5.4.1  聚集索引</h3><p>InnoDB存储引擎表的索引组织表，即表中数据按照主键顺序存放。而聚集索引就是按照每张表的主键构造一颗B+树，同时叶子节点中存放的即为整张表的行记录数据，也将聚集索引的叶子节点称为数据页。聚集索引的这个特性决定了索引组织表中数据也是索引的一部分。同B+树数据结构一样，每个数据页否通过一个双向链表来进行链接。</p>
+<p>每张表智能有一个聚集索引。聚集索引可以在B+树索引的叶子节点上直接找到数据，聚集索引可以很快地访问针对范围值的查询。</p>
+<p>数据页上存放的是完整的每行的记录，而在非数据页的索引页中，存放的仅仅是键值及指向数据页的偏移量，而不是一个完整的行记录。</p>
+<p>聚集索引存储并不是物理上连续的，而是逻辑上连续的。页通过双向链表链接，页按照主键的顺序排列；页中的记录也是通过双向链表进行维护的，物理存储上可以同样不按照主键存储。</p>
+<p>聚集索引的好处：对于主键的排序查找和范围查找速度非常快。叶子节点的数据就是用户所要查询的数据。</p>
+<h3 id="5-4-2-辅助索引"><a href="#5-4-2-辅助索引" class="headerlink" title="5.4.2  辅助索引"></a>5.4.2  辅助索引</h3><p>辅助索引也称非聚集性索引，叶子节点不包含行记录的全部数据。叶子节点除了包含键值以外，每个叶子节点中的索引行中还包含了一个书签。该书签用来告诉InnoDB哪里可以找到与索引对应的行数据。由于InnoDB存储引擎表是索引组织表，因此InnoDB存储引擎的辅助索引的书签就是相应行数据的聚集索引键。</p>
+<p>辅助索引的存在并不影响数据在聚集索引中的组织，因此每张表可以有多个辅助索引。当通过辅助索引来寻找数据时，InnoDB会遍历辅助索引并通过叶级别的指针获得指向主键索引的主键，再通过主键索引来找到一个完整的行记录。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">crazyStrome</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://crazystrome.github.io/2020/11/04/MySQL%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/">http://crazystrome.github.io/2020/11/04/MySQL%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://crazyStrome.github.io" target="_blank">crazyStrome的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2020/11/04/OnJava8%E7%AC%94%E8%AE%B0/"><img class="prev-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info"></div></div></a></div><div class="next-post pull-right"><a href="/2020/11/04/JVM%E7%9A%84%E5%86%85%E5%AD%98%E5%88%86%E5%8C%BA/"><img class="next-cover" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info"></div></div></a></div></nav></article></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 By crazyStrome</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><div class="js-pjax"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>

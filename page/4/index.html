@@ -1,0 +1,366 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>crazyStrome的博客</title><meta name="author" content="crazyStrome"><meta name="copyright" content="crazyStrome"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="啥都写">
+<meta property="og:type" content="website">
+<meta property="og:title" content="crazyStrome的博客">
+<meta property="og:url" content="http://crazystrome.github.io/page/4/index.html">
+<meta property="og:site_name" content="crazyStrome的博客">
+<meta property="og:description" content="啥都写">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://crazystrome.github.io/null">
+<meta property="article:author" content="crazyStrome">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://crazystrome.github.io/null"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://crazystrome.github.io/page/4/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.2.0',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  ClickShowText: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: false,
+  isHome: true,
+  isHighlightShrink: false,
+  isSidebar: false,
+  postUpdate: '2020-11-04 18:25:37'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {
+  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }
+})()</script><meta name="generator" content="Hexo 5.2.0"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/null" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">40</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">2</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">1</div></a></div></div></div><hr/></div></div><div id="body-wrap"><header class="full_page" id="page-header" style="background-image: url(https://i.loli.net/2020/10/15/3kgeNG8cZwj4Qnr.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">crazyStrome的博客</a></span><span id="menus"><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="site-info"><h1 id="site-title">crazyStrome的博客</h1><div id="site-subtitle"><span id="subtitle"></span></div></div><div id="scroll-down"><i class="fas fa-angle-down scroll-down-effects"></i></div></header><main class="layout_page" id="content-inner"><div class="recent-posts" id="recent-posts"><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/11/04/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E8%BF%90%E8%BE%93%E5%B1%82/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E8%BF%90%E8%BE%93%E5%B1%82/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:59.106Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></span></div><div class="content">
+
+
+1. 运输层
+1.1. 概述和运输层服务
+1.1.1. 运输层和网络层的关系
+1.1.2. 因特网运输层概述
+
+
+1.2. 多路复用和多路分解
+1.3. 无连接运输：UDP
+1.3.1. UDP报文段结构
+1.3.2. UDP校验和
+
+
+1.4. 可靠数据传输的原理
+1.4.1. 构造可靠数据传输协议
+1.4.2. 回退N步-滑动窗口协议
+
+
+1.5. 面向连接的运输：TCP
+1.5.1. TCP报文段结构
+1.5.1.1. 确认号和序号
+
+
+1.5.2. 流量控制
+1.5.3. TCP连接管理
+1.5.4. SYN洪泛攻击
+
+
+1.6. 拥塞控制原理
+1.6.1. 拥塞控制方法
+
+
+1.7. TCP拥塞控制
+1.7.1. 拥塞控制算法
+1.7.1.1. 加性增、乘性减
+1.7.1.2. 慢启动
+1.7.1.3. 对超时时间做出反应
+
+
+
+
+
+
+
+
+1. 运输层运输层位于应用层和网络层之间，是分层的网络体系结构的重要部分。该层为运行在不同主机上的应用程序提供直接的通信服务起着至关重要的作用。
+1.1. 概述和运输层服务运输层协议为运行在不同主机上的应用程序之间提供了==逻辑通道= ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/11/04/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E5%BA%94%E7%94%A8%E5%B1%82/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E5%BA%94%E7%94%A8%E5%B1%82/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:59.083Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></span></div><div class="content">
+
+
+1. 应用层
+1.1. 应用层协议原理
+1.1.1. 网络应用程序体系结构
+1.1.2. 因特网提供的运输服务
+1.1.2.1. TCP服务
+1.1.2.2. UDP服务
+1.1.2.3. 进程寻址
+
+
+1.1.3. 应用层协议
+
+
+1.2. Web应用和HTTP协议
+1.2.1. 非持久连接和持久连接
+1.2.2. HTTP报文格式
+1.2.2.1. HTTP请求报文
+1.2.2.2. HTTP响应报文
+
+
+1.2.3. cookie
+1.2.4. Web缓存
+1.2.5. 条件GET方法
+
+
+1.3. 文件传输协议：FTP
+1.4. 因特网中的电子邮件
+1.4.1. SMTP
+1.4.2. 与HTTP的对比
+1.4.3. 邮件报文格式和MIME
+1.4.4. 邮件访问协议
+
+
+1.5. DNS：因特网的目录服务
+1.5.1. DNS提供的服务
+1.5.2. DNS工作机理概述
+1.5.2.1. 分布式、层次数据库
+
+
+
+
+1.6. TCP套接字编程
+1.6.1. Go客户机/服务器应用程序例子
+
+
+1.7. UDP套接字编程
+
+
+
+
+1. 应用层1.1. 应用层协议原理1.1 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/11/04/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E5%92%8C%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:59.062Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></span></div><div class="content">无线网络和移动网络概述无线主机：无线主机可以是便携机、掌上计算机、PDA、电话或者台式计算机。
+无线链路。主机通过无线通信链路连接到一个基站或者另外一个无线主机。不同的无线链路技术有不同的传输速率和传输距离。
+基站。基站是无线网络基础设施的一个关键部分。与无线主机和无线链路不同，基站在有线网络中没有明确的对应设备。它负责向与之关联的无线主机发送数据和从主机那里接收数据。
+当一台移动主机移动范围超出一个基站的覆盖范围而到达另一个基站的覆盖范围后，它将改变其接入更大网络的连接点，这一过程称为切换。
+网络基础设施。无线主机希望与之通信的更大的网络。
+单跳，基于基础设施。这些网络具有与较大的有线网络连接的基站。此外，该基站与无线主机之间的所有通信都通过一个无线跳。
+单跳，无基础设施。在这些网络中，存在与无线网络相连的基站。
+多跳，基于基础设施。某些传感网络和所谓的无线网状网络属于这种类别。
+多跳，无基础设施。这些网络没有基站，并且节点为了到达目的地可能必须在几个其他无线节点之间中继报文。有移动自组织网络和车载自组织网络。
+无线链路和网络特征有线链路和无线链路之间的区别：
+递减的信号强度。电磁波 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/11/04/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E7%BD%91%E7%BB%9C%E5%B1%82/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E7%BD%91%E7%BB%9C%E5%B1%82/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:59.046Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></span></div><div class="content">
+
+
+1. 网络层
+1.1. 概述
+1.1.1. 转发和选路
+1.1.2. 网络服务模型
+
+
+1.2. 虚电路和数据报网络
+1.2.1. 虚电路网络
+1.2.2. 数据报网络
+
+
+1.3. 路由器工作原理
+1.3.1. 输入端口
+1.3.2. 交换结构
+1.3.3. 输出端口
+1.3.4. 何时出现排队
+
+
+1.4. 网际协议：因特网中的转发和编址
+1.4.1. 数据报格式
+1.4.2. IPv4编址
+1.4.3. ICMP：互联网控制报文协议
+
+
+1.5. 选路算法
+1.6. 因特网中的选路
+1.6.1. 因特网中自治系统内部选路：IP
+
+
+
+
+
+
+1. 网络层转发涉及分组从一条入链路到一台路由器中的出链路的传送。选路涉及一个网络中的所有路由器，它们经选路协议共同交互，以决定分组从源到目的地结点所采用的路径。
+1.1. 概述路由器不运行应用层和传输层协议
+1.1.1. 转发和选路网络层的作用是把分组从发送主机移动到接收主机。为此，需要两种重要的功能：
+
+转发。当一个分组到达某路由器的一条输入链路时，该路由器必须将该分组移动到适当的输出链路。
+选路。当分组从发送方流向接收方时，网络层必 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/11/04/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B-%E9%93%BE%E8%B7%AF%E5%B1%82%E5%92%8C%E5%B1%80%E5%9F%9F%E7%BD%91/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:59.030Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></span></div><div class="content">链路层和局域网链路层：概述和服务将主机和路由器均称为节点。把沿着通信路径连接相邻节点的通信信道称为链路。为了将一个数据报从源主机传输到目的主机，数据报必须通过端到端路径山高的没段链路传输。在通过特定链路时，传输节点将此数据报封装在链路层帧中，并将该帧发送到链路上；接收节点然后接收该帧并提取出数据报。
+链路层提供的服务链路层协议用来在独立的链路上移动数据报。链路层协议定义了链路两端的节点之间交换的分组格式，以及当发送和接收分组时这些节点采取的动作。链路层协议交换的数据单元称为帧。每个链路层帧通常封装了一个网络层的数据报。当发送和接收帧时，链路层协议所采取的动作包括差错检测、重传、流量控制和随机接入。链路层协议的例子包括以太网、802.11无限LAN、令牌环和PPP；在很多场合下，ATM也被认为是链路层协议。
+任何链路层的基本服务都是将数据报通过单一通信链路从一个结点移动到相邻节点，所提供的服务细节将随链路层协议从一种进入下一种而改变。链路层协议能够提供的可能服务包括：
+
+成帧。链路层协议把网络层数据报用链路层帧封装起来。一个帧由一个数据字段和若干个首部字段组成，其中网络层数据报就插在数据 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/11/04/%E7%BA%BF%E6%80%A7%E8%A1%A8-%E6%95%B0%E7%BB%84/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/%E7%BA%BF%E6%80%A7%E8%A1%A8-%E6%95%B0%E7%BB%84/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:58.962Z" title="发表于 2020-11-04 18:24:58">2020-11-04</time></span></div><div class="content">
+
+
+排序数组去重
+线性链表去重
+缺失的第一个正数
+寻找重复数
+二维数组中的查找
+
+
+排序数组去重描述：给定一个排序数组，原地删除重复数，返回新的数组的长度
+例如：[]int&#123;1,1,2,3,4,4,5&#125;，返回5，且数组变为[]int&#123;1,2,3,4,5&#125;
+思路：使用快慢指针，slow和fast。slow为0，fast为1；当slow位置和fast相同时，fast++；否则slow++，把slow位置的数设置为fast位置的数。
+代码：
+12345678910111213func removeDuplicates(nums []int) int &#123;	n := len(nums)	slow := 0	fast := 1	for fast &lt; n &#123;		if nums[fast] != nums[slow] &#123;			slow++			nums[slow] = nums[fast]		&#125;		fast++	&#125;	return slow + 1&#125;
+
+ 
+线性链表去重把数组去重改成链表去重即可。 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:58.931Z" title="发表于 2020-11-04 18:24:58">2020-11-04</time></span></div><div class="content">文件系统长期存储信息有三个基本要求：
+
+能够存储大量信息。
+使用信息的进程终止时，信息仍旧存在。
+必须能使多个进程并发存取有关信息。
+
+文件是进程创建的信息逻辑单元。
+文件文件命名文件名用圆点分为两部分，后面的部分为文件扩展名。
+文件结构
+文件类型UNIX和Windows都有普通文件和目录。UNIX还有字符特殊文件和块特殊文件。普通文件中包含有用户信息。目录是管理文件系统结构的系统文件。字符特殊文件和输入/输出有关，用于串行IO类设备，如终端、打印机、网络等。块特殊文件用于磁盘类设备。
+普通文件一般分为ASCII文件和二进制文件。
+
+文件存取顺序存取和随机存取，使用seek操作设置存取的指针在文件中的位置。
+文件属性
+文件操作常用的系统调用：
+
+create。创建不包含数据的文件。
+delete。删除文件释放磁盘空间。
+open。打开文件，把文件属性和磁盘地址表装入内存，以便于后序调用的快速存取。
+close。关闭文件。
+read。读取文件。
+write。写入文件。
+append。向文件末尾添加数据。
+seek。调整位置指针。
+get attributes。获取文件属性。
+set at ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E6%AD%BB%E9%94%81/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E6%AD%BB%E9%94%81/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:58.899Z" title="发表于 2020-11-04 18:24:58">2020-11-04</time></span></div><div class="content">死锁资源大部分死锁都和资源相关。需要排他性使用的对象成为资源。资源可以使硬件设备或者一组信息。
+可抢占资源和不可抢占资源资源分为两类：可抢占的和不可抢占的。可抢占资源可以从拥有它的进程中抢占而不会产生任何副作用，存储器就是一类可抢占资源。
+不可抢占资源是指在不引起相关的计算失败的情况下，无法把它从占有它的进程处抢占过来。死锁和不可抢占资源有关。
+资源获取可以使用信号量或者互斥信号量管理资源分配，使用down操作来申请资源。
+
+死锁概述死锁的规范定义：如果一个进程集合中的每个进程都在等待只能由该进程集合中的其他进程才能引发的事件，那么，该进程几个就是死锁的。
+资源死锁的条件死锁的四个条件：
+
+互斥条件。每个资源要不已经分配给一个进程，要么就是可用的。
+占有和等待条件。已经得到某个资源的进程可以再请求其他新的资源。
+不可抢占条件。已经分配给一个进程的资源不能强制性地被抢占，它只能由占有它的进程显式地释放。
+环路等待条件。死锁发生时，系统中一定有两个或者两个以上的进程组成的一条环路，该环路中的每个进程都在等待着下一个进程所占有的资源。
+
+死锁发生时，以上四个条件一定是同时满足的。如果任何一个 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:58.798Z" title="发表于 2020-11-04 18:24:58">2020-11-04</time></span></div><div class="content">输入/输出I/O硬件原理I/O设备I/O设备大致分为两类：块设备和字符设备。块设备把信息储存在固定大小的块中，每个块有自己的地址。所有传输以一个或多个完整的块为单位。块设备的基本特征是每个块都能独立于其他块而读写。硬盘、CD-ROM和USB是最常见的块设备。
+字符设备以字符为单位发送或接受一个字符流，而不考虑任何块结构。字符设备是不可寻址的，也没有任何寻道操作。打印机、网络接口、鼠标、以及大多数与磁盘不同的设备都可看做是字符设备。
+有些设备没有包括进去，如时钟等。
+设备控制器I/O设备一般由机械部件和电子部件两部分组成。电子部件称为设备控制器或适配器。
+内存映射I/O每个控制器有几个寄存器用来与CPU进行通信。通过写入这些寄存器，操作系统可以命令设备发送数据、接收数据、开启或关闭、或者执行某些其他操作。通过读取这些寄存器，操作系统可以了解设备的状态，是否准备好接收一个新的命令。
+除了这些控制器存起之外，许多设备还有一个操作系统可以读写的数据缓冲区。
+CPU和设备的控制寄存器以及数据缓冲区通信：每个控制寄存器分配一个I/O端口号，所有的I/O端口形成I/O端口空间；将所有的控制寄存器映射 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/10/15/java%E5%B9%B6%E5%8F%91%E5%AE%9E%E6%88%98/" title="Java并发实战内容">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Java并发实战内容"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/10/15/java%E5%B9%B6%E5%8F%91%E5%AE%9E%E6%88%98/" title="Java并发实战内容">Java并发实战内容</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-10-15T00:58:32.213Z" title="发表于 2020-10-15 08:58:32">2020-10-15</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Java/">Java</a></span></div><div class="content">2.3.1.  内部锁每个Java对象都可以隐式地扮演一个用于同步的锁的角色；这些内置的锁成为内部锁或者监视器锁。内部锁在Java中扮演了互斥锁的角色。
+2.3.2.  可重入锁当一个线程请求其他线程已经占有的锁时，请求线程将被阻塞。然而内部锁时可重入的，因此线程在试图获得它自己占有的锁时，请求会成功。可重入意味着所请求的是基于每线程而不是基于每调用的。可重入的实现是通过为每一个锁关联一个请求计数和一个占有它的线程。当计数为0时，认为锁是未被占有的。线程请求一个未被占有的锁时，JVM将记录锁的占有者，并将请求计数置为一。如果同一线程再次请求这个锁，计数将递增；每次占用线程退出同步块，计数器值将递减。直到计数器达到0，锁被释放。
+3.1.4.  Volatile变量Volatile确保对一个变量的更新以可预见的方式告知其他的线程。访问Volatile变量不会加锁，也就不会引起线程的阻塞，这使得Volatile相对于sychronized而言，是轻量级的同步。
+Volatile通常用作标识完成、中断、状态的标记使用。
+加锁可以保证可见性与原子性，volatile只能保证可见性。
+3.2.  ...</div></div></div><nav id="pagination"><div class="pagination"><a class="extend prev" rel="prev" href="/page/3/"><i class="fas fa-chevron-left fa-fw"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span></div></nav></div><div class="aside_content" id="aside_content"><div class="card-widget card-info"><div class="card-content"><div class="card-info-avatar is-center"><img class="avatar-img" src="/null" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">crazyStrome</div><div class="author-info__description">啥都写</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length_num">40</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length_num">2</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length_num">1</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div></div><div class="sticky_layout"><div class="card-widget card-announcement"><div class="card-content"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div></div><div class="card-widget card-recent-post"><div class="card-content"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E5%A4%9A%E5%AA%92%E4%BD%93%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" title="无题"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E5%A4%9A%E5%AA%92%E4%BD%93%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" title="无题">无题</a><time datetime="2020-11-04T10:24:59.716Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E5%A4%9A%E5%A4%84%E7%90%86%E6%9C%BA%E7%B3%BB%E7%BB%9F/" title="无题"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E5%A4%9A%E5%A4%84%E7%90%86%E6%9C%BA%E7%B3%BB%E7%BB%9F/" title="无题">无题</a><time datetime="2020-11-04T10:24:59.700Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86/" title="无题"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86/" title="无题">无题</a><time datetime="2020-11-04T10:24:59.684Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-Linux/" title="无题"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-Linux/" title="无题">无题</a><time datetime="2020-11-04T10:24:59.664Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/11/04/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8E%9F%E7%90%86-%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" title="无题"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2020/11/04/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8E%9F%E7%90%86-%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" title="无题">无题</a><time datetime="2020-11-04T10:24:59.648Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></div></div></div></div></div><div class="card-widget card-categories"><div class="card-content"><div class="item-headline"><i class="fas fa-folder-open"></i><span>分类</span></div><ul class="card-category-list" id="aside-cat-list">
+            <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Java/"><span class="card-category-list-name">Java</span><span class="card-category-list-count">1</span></a></li>
+            
+            </ul></div></div><div class="card-widget card-tags"><div class="card-content"><div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div><div class="card-tag-cloud"><a href="/tags/Java/" style="font-size: 1.1em; color: #999">Java</a> <a href="/tags/%E9%94%81/" style="font-size: 1.1em; color: #999">锁</a></div></div></div><div class="card-widget card-archives"><div class="card-content"><div class="item-headline"><i class="fas fa-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/11/"><span class="card-archive-list-date">十一月 2020</span><span class="card-archive-list-count">39</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/10/"><span class="card-archive-list-date">十月 2020</span><span class="card-archive-list-count">1</span></a></li></ul></div></div><div class="card-widget card-webinfo"><div class="card-content"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站资讯</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">40</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"></div></div><div class="webinfo-item"><div class="item-name">本站总访问量 :</div><div class="item-count" id="busuanzi_value_site_pv"></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2020-11-04T10:25:36.868Z"></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 By crazyStrome</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><div class="js-pjax"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>

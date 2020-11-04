@@ -1,0 +1,325 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>crazyStrome的博客</title><meta name="author" content="crazyStrome"><meta name="copyright" content="crazyStrome"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="啥都写">
+<meta property="og:type" content="website">
+<meta property="og:title" content="crazyStrome的博客">
+<meta property="og:url" content="http://crazystrome.github.io/page/3/index.html">
+<meta property="og:site_name" content="crazyStrome的博客">
+<meta property="og:description" content="啥都写">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://crazystrome.github.io/null">
+<meta property="article:author" content="crazyStrome">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://crazystrome.github.io/null"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://crazystrome.github.io/page/3/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.2.0',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  ClickShowText: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: false,
+  isHome: true,
+  isHighlightShrink: false,
+  isSidebar: false,
+  postUpdate: '2020-11-04 18:25:37'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {
+  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }
+})()</script><meta name="generator" content="Hexo 5.2.0"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/null" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">40</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">2</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">1</div></a></div></div></div><hr/></div></div><div id="body-wrap"><header class="full_page" id="page-header" style="background-image: url(https://i.loli.net/2020/10/15/3kgeNG8cZwj4Qnr.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">crazyStrome的博客</a></span><span id="menus"><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="site-info"><h1 id="site-title">crazyStrome的博客</h1><div id="site-subtitle"><span id="subtitle"></span></div></div><div id="scroll-down"><i class="fas fa-angle-down scroll-down-effects"></i></div></header><main class="layout_page" id="content-inner"><div class="recent-posts" id="recent-posts"><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/11/04/Redis%E8%BF%90%E7%BB%B4-%E9%94%AE%E7%AE%A1%E7%90%86/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/Redis%E8%BF%90%E7%BB%B4-%E9%94%AE%E7%AE%A1%E7%90%86/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:59.284Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></span></div><div class="content">
+
+
+键管理
+单个键管理
+
+
+
+
+键管理单个键管理针对单个键的命令
+
+键重命名。rename key newkey,renamenx只有在newkey不存在的时候才被覆盖。
+
+随机返回一个键。randomkey
+
+键过期。除了expire、ttl命令外，Redis还提供了expireat、pexpire、pexpireat、pttl、persist等一系列命令。
+
+expire key second：键在second秒后过期
+
+expireat key timestamp：键在秒级时间戳timestap后过期，
+
+ttl和pttl都可以查询键的剩余过期时间，但是pttl精度更高可以达到毫秒级别，有3中种返回值：
+
+大于等于0的整数：键剩余过期时间
+-1：键没有设置过期时间
+-2：键不存在
+
+expireat命令可以设置键的秒级过期时间戳。使用Redis相关过期指令时需要注意：
+
+如果expire key的键不存在，返回结果为0
+
+如果过期时间为负值，键会立即被删除。
+
+persist命令可以将键的过期时间清除
+
+对于字符串类型键，执行set命令会去掉过期时间
+
+Redis不支持二级数据 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/11/04/Redis%E8%BF%90%E7%BB%B4-%E9%9B%86%E5%90%88/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/Redis%E8%BF%90%E7%BB%B4-%E9%9B%86%E5%90%88/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:59.284Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></span></div><div class="content">
+
+
+集合
+命令
+集合内操作
+集合间操作
+
+
+内部编码
+使用场景
+
+
+
+
+
+集合集合类型中不允许有重复元素。
+命令集合内操作
+添加元素：sadd key element [element...]，返回添加成功的元素的个数
+删除元素：srem key element [element...]，返回成功删除的元素个数
+计算元素个数：scard key，时间复杂度o(1)，它不会遍历集合所有元素，而是直接使用Redis内部的变量
+判断元素是否在集合中：sismember key element；
+随机从集合中返回指定个数元素：srandmember key [count]；count是可选参数，如果不选默认为1
+从集合中随机弹出元素：spop key
+获取所有元素：smembers key，smembers和lrange、hgetall都属于比较重的命令，如果元素过多存在阻塞Redis的可能性
+
+集合间操作
+求多个集合的交集：sinter key [key...]
+求多个集合的并集：sunion key [key...]
+求多个集合的差集：sdiff key [key...]
+
+
+
+将交集、 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/11/04/Redis%E8%BF%90%E7%BB%B4-%E6%8C%81%E4%B9%85%E5%8C%96/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/Redis%E8%BF%90%E7%BB%B4-%E6%8C%81%E4%B9%85%E5%8C%96/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:59.263Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></span></div><div class="content">5  持久化持久化功能有效地避免因进程退出而造成的数据丢失问题。
+5.1  RDBRDB持久化是把当前进程数据生成快照保存到硬盘的过程，触发RDB持久化过程分为手动触发和自动触发。
+5.1.1  触发机制手动触发分别对应save和bgsave命令：
+save命令：阻塞当前Redis服务器，直到RDB过程完成为止，对于内存比较大的实例会造成长时间的阻塞，线上环境不建议用。
+1DB saved on disk
+
+bgsave命令：Redis进程执行fork操作创建子进程，RDB持久化过程由子进程负责，完成后自动结束。阻塞只发生在fork阶段，一般时间很短。
+Redis内部所有的涉及RDB的操作都采用bgsave的方式，而save命令已经废弃。
+Redis内部还存在自动触发RDB的持久化机制。
+
+使用save相关配置，如save m n。表示m秒内数据集存在n次修改时，自动触发bgsave。
+如果从节点执行全量复制操作，主节点自动执行bgsave生成RDB文件并发给从节点。
+执行debug reload命令重新加载Redis时，也会自动触发save操作。
+默认情况下执行shutdown命令时 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/11/04/OnJava8%E7%AC%94%E8%AE%B0/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/OnJava8%E7%AC%94%E8%AE%B0/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:59.231Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></span></div><div class="content">[TOC]
+CH14  流式编程流式编程就是把一系列对象看成是一条数据流，像是流水线一样，开发者可以在这条流水线上进行替换，读取，剔除等操作。
+12345678910111213// streams/Randoms.javaimport java.util.*;public class Randoms &#123;    public static void main(String[] args) &#123;        new Random(47)            .ints(5, 20)            .distinct()            .limit(7)            .sorted()            .forEach(System.out::println);    &#125;&#125;
+
+中间流操作：
+
+distinct()用来获取非重复的元素。
+limit()方法获取一定数量的元素。
+sorted()排序。
+forEach()遍历对每个元素进行操作。
+
+流式编程使用内部迭代，这种机制使得编写的代码可读性更强。
+流是懒加载的，这 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/11/04/MySQL%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/MySQL%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:59.200Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></span></div><div class="content">[TOC]
+1.  MySQL体系结构和存储引擎1.1.  定义数据库和实例数据库：物理操作系统文件或其他形式文件类型的集合。
+实例：MySQL数据库由后台线程以及一个共享内存区组成。共享内存可以被运行的后台线程所共享。数据库实例才是真正用于操作数据库文件的。
+MySQL被设计成一个单进程多线程架构的数据库。MySQL数据库实例在系统上的表现就是一个进程。
+1.2.  MySQL体系结构从概念上来说，数据库是文件的集合，是依照某种数据模型组织起来并存放于二级存储器中的数据集合：数据库实例是程序，是位于用户与操作系统之间的一层数据管理软件，用户对数据库数据的任何操作，包括数据库定义、数据库查询、数据维护、数据库运行控制等都是在数据库实例下进行的，应用程序只有通过数据库实例才能和数据库打交道。
+数据库是由一个个文件组成（一般来说都是二进制文件），要对这些文件执行诸如SELECT、INSERT、UPDATE和DELETE之类的操作是不能通过简单的操作文件来更改数据库的内容，需要通过数据库实例来完成对数据库的操作。
+
+MySQL由一下几部分组成：
+
+连接池组件
+管理服务和工具组件
+SQL接口组 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/11/04/JVM%E7%9A%84%E5%86%85%E5%AD%98%E5%88%86%E5%8C%BA/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/JVM%E7%9A%84%E5%86%85%E5%AD%98%E5%88%86%E5%8C%BA/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:59.183Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></span></div><div class="content">JVM内存区域分为五个部分，分别是堆，方法区，虚拟机栈，本地方法栈，程序计数器。
+
+
+堆。堆是Java对象的存储区域，任何用new字段分配的Java对象实例和数组，都被分配在堆上，Java堆可使用-Xms -Xmx进行内存控制，值得一提的是从JDK1.7版本之后，运行时常量池从方法区移到了堆上。
+方法区。它用于存储已被虚拟机加载的类信息，常量，静态变量，即时编译器编译后的代码等数据，方法区在JDK1.7版本及以前被称为永久代，从JDK1.8永久代被移除。
+虚拟机栈。虚拟机中执行每个方法的时候，都会创建一个栈帧用于存储局部变量表，操作数栈，动态链接，方法出口等信息。
+本地方法栈。与虚拟机栈发挥的作用相似，相比于虚拟机栈为Java方法服务，本地方法栈为虚拟机使用的Native方法服务，执行每个本地方法的时候，都会创建一个栈帧用于存储局部变量表，操作数栈，动态链接，方法出口等信息。
+程序计数器。指示Java虚拟机下一条需要执行的字节码指令。 
+
+以上五个区域是Java虚拟机内存划分情况，其中方法区和堆被JVM中多个线程共享，比如类的静态常量就被存放在方法区，供类对象之间共享，虚拟机栈，本地方 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/11/04/JVM%E7%9A%84GC/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/JVM%E7%9A%84GC/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:59.169Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></span></div><div class="content">
+
+
+概述
+对象存活判断
+垃圾收集算法
+标记 -清除算法
+复制算法
+标记-压缩算法
+分代收集算法
+
+
+垃圾收集器
+Serial收集器
+ParNew收集器
+Parallel收集器
+CMS收集器
+G1收集器
+
+
+
+
+概述垃圾收集 Garbage Collection 通常被称为“GC”，它诞生于1960年 MIT 的 Lisp 语言，经过半个多世纪，目前已经十分成熟了。
+jvm 中，程序计数器、虚拟机栈、本地方法栈都是随线程而生随线程而灭，栈帧随着方法的进入和退出做入栈和出栈操作，实现了自动的内存清理，因此，我们的内存垃圾回收主要集中于 java 堆和方法区中，在程序运行期间，这部分内存的分配和使用都是动态的。
+对象存活判断判断对象是否存活一般有两种方式：
+
+引用计数：每个对象有一个引用计数属性，新增一个引用时计数加1，引用释放时计数减1，计数为0时可以回收。此方法简单，无法解决对象相互循环引用的问题。
+
+可达性分析（Reachability Analysis）：从GC Roots开始向下搜索，搜索所走过的路径称为引用链。当一个对象到GC Roots没有任何引用链相连时，则证明此对象是不可 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/11/04/HashMap%E7%9B%B8%E5%85%B3/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/HashMap%E7%9B%B8%E5%85%B3/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:59.153Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></span></div><div class="content">
+
+
+HashMap相关面试问题
+你知道HashMap的工作原理吗？你知道HashMap的get()方法的工作原理吗？
+当两个对象的hashcode相同会发生什么？
+如果两个键的hashcode相同，你如何获取值对象？
+如果HashMap的大小超过了负载因子(load factor)定义的容量，怎么办？
+你了解重新调整HashMap大小存在什么问题吗？
+你说HashMap的get迭代了一个链表，那怎么保证HashMap的时间复杂度O(1)?链表的查找的时间复杂度又是多少？
+put时，是加到链表头还是链表尾
+传统 HashMap 的缺点
+HashMap Hashtable LinkedHashMap 和TreeMap
+
+
+
+
+HashMap相关面试问题你知道HashMap的工作原理吗？你知道HashMap的get()方法的工作原理吗？HashMap是基于hashing的原理，我们使用put(key, value)存储对象到HashMap中，使用get(key)从HashMap中获取对象。当我们给put()方法传递键和值时，我们先对键调用hashCode()方法，返回的hashCode用于 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/11/04/container/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/container/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:59.122Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></span></div><div class="content">containercontainer包下有三个子包：ring、heap、list，分别代表了环形链表、堆、链表的数据结构实现。
+ring</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/11/04/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E7%AE%97%E6%B3%95%E9%A2%98LeetCode/" title="无题">     <img class="post_bg" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/11/04/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E7%AE%97%E6%B3%95%E9%A2%98LeetCode/" title="无题">无题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T10:24:59.122Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></span></div><div class="content">
+
+
+无重复字符的最长子串
+整数反转
+最长回文子串
+接雨水
+合并两个有序链表
+最大自序和
+三数之和
+K个一组反转链表
+合并区间
+全排列
+
+
+无重复字符的最长子串描述：给定一个字符串，找出不含有重复字符的最长子串
+例如：”abcabcbb” 3
+思路：使用滑动窗口，双指针移动，判断right字符是否在窗口，没有就继续，同时更新最大值；有的话就修改left值。
+代码：
+12345678910111213141516func lengthOfLongestSubstring(s string) int &#123;    var res int    var left, right int    s1 := s[left:right]    for ; right &lt; len(s); right ++ &#123;        if index := strings.IndexByte(s1, s[right]); index != -1 &#123;            left += index+1        &#125;        s1 = s[left: right ...</div></div></div><nav id="pagination"><div class="pagination"><a class="extend prev" rel="prev" href="/page/2/"><i class="fas fa-chevron-left fa-fw"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/4/"><i class="fas fa-chevron-right fa-fw"></i></a></div></nav></div><div class="aside_content" id="aside_content"><div class="card-widget card-info"><div class="card-content"><div class="card-info-avatar is-center"><img class="avatar-img" src="/null" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">crazyStrome</div><div class="author-info__description">啥都写</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length_num">40</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length_num">2</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length_num">1</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div></div><div class="sticky_layout"><div class="card-widget card-announcement"><div class="card-content"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div></div><div class="card-widget card-recent-post"><div class="card-content"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E5%A4%9A%E5%AA%92%E4%BD%93%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" title="无题"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E5%A4%9A%E5%AA%92%E4%BD%93%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" title="无题">无题</a><time datetime="2020-11-04T10:24:59.716Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E5%A4%9A%E5%A4%84%E7%90%86%E6%9C%BA%E7%B3%BB%E7%BB%9F/" title="无题"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E5%A4%9A%E5%A4%84%E7%90%86%E6%9C%BA%E7%B3%BB%E7%BB%9F/" title="无题">无题</a><time datetime="2020-11-04T10:24:59.700Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86/" title="无题"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86/" title="无题">无题</a><time datetime="2020-11-04T10:24:59.684Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-Linux/" title="无题"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2020/11/04/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-Linux/" title="无题">无题</a><time datetime="2020-11-04T10:24:59.664Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/11/04/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8E%9F%E7%90%86-%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" title="无题"><img src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/img/default.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2020/11/04/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8E%9F%E7%90%86-%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" title="无题">无题</a><time datetime="2020-11-04T10:24:59.648Z" title="发表于 2020-11-04 18:24:59">2020-11-04</time></div></div></div></div></div><div class="card-widget card-categories"><div class="card-content"><div class="item-headline"><i class="fas fa-folder-open"></i><span>分类</span></div><ul class="card-category-list" id="aside-cat-list">
+            <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Java/"><span class="card-category-list-name">Java</span><span class="card-category-list-count">1</span></a></li>
+            
+            </ul></div></div><div class="card-widget card-tags"><div class="card-content"><div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div><div class="card-tag-cloud"><a href="/tags/Java/" style="font-size: 1.1em; color: #999">Java</a> <a href="/tags/%E9%94%81/" style="font-size: 1.1em; color: #999">锁</a></div></div></div><div class="card-widget card-archives"><div class="card-content"><div class="item-headline"><i class="fas fa-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/11/"><span class="card-archive-list-date">十一月 2020</span><span class="card-archive-list-count">39</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/10/"><span class="card-archive-list-date">十月 2020</span><span class="card-archive-list-count">1</span></a></li></ul></div></div><div class="card-widget card-webinfo"><div class="card-content"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站资讯</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">40</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"></div></div><div class="webinfo-item"><div class="item-name">本站总访问量 :</div><div class="item-count" id="busuanzi_value_site_pv"></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2020-11-04T10:25:36.868Z"></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 By crazyStrome</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><div class="js-pjax"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>
