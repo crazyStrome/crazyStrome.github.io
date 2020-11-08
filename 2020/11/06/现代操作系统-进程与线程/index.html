@@ -1,0 +1,281 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>现代操作系统-线程与进程 | crazyStrome的博客</title><meta name="keywords" content="笔记,现代操作系统"><meta name="author" content="crazyStrome"><meta name="copyright" content="crazyStrome"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="1. 进程与线程1.1. 进程严格来说，在某一瞬间，CPU只能运行一个进程。但在1秒钟期间，它可以运行多个进程，这样就产生并行的错觉。这也称为伪并行，一次来区分多处理器系统（该系统有两个或者多个CPU共享同一个物理内存）的真正硬件并行。  1.1.1. 进程模型计算机上所有课运行的软件，通常也包括操作系统，被组织成若干顺序进程，简称进程。 一个进程是某种类型的一个活动，它有程序、输入、暑促以及状态">
+<meta property="og:type" content="article">
+<meta property="og:title" content="现代操作系统-线程与进程">
+<meta property="og:url" content="http://crazystrome.github.io/2020/11/06/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/index.html">
+<meta property="og:site_name" content="crazyStrome的博客">
+<meta property="og:description" content="1. 进程与线程1.1. 进程严格来说，在某一瞬间，CPU只能运行一个进程。但在1秒钟期间，它可以运行多个进程，这样就产生并行的错觉。这也称为伪并行，一次来区分多处理器系统（该系统有两个或者多个CPU共享同一个物理内存）的真正硬件并行。  1.1.1. 进程模型计算机上所有课运行的软件，通常也包括操作系统，被组织成若干顺序进程，简称进程。 一个进程是某种类型的一个活动，它有程序、输入、暑促以及状态">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/03/22/JKpvE5waTZ6yfVz.png">
+<meta property="article:published_time" content="2020-11-06T03:02:48.900Z">
+<meta property="article:modified_time" content="2020-10-14T16:00:00.000Z">
+<meta property="article:author" content="crazyStrome">
+<meta property="article:tag" content="笔记">
+<meta property="article:tag" content="现代操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/03/22/JKpvE5waTZ6yfVz.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://crazystrome.github.io/2020/11/06/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.2.0',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  ClickShowText: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: true,
+  isSidebar: true,
+  postUpdate: '2020-10-15 00:00:00'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {
+  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }
+})()</script><meta name="generator" content="Hexo 5.2.0"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="https://avatars2.githubusercontent.com/u/24493607?s=460&amp;u=ae13dfdaed519e38912080c57dd919504d032754&amp;v=4" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">44</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">20</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">8</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B"><span class="toc-number">1.</span> <span class="toc-text">1. 进程与线程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E8%BF%9B%E7%A8%8B"><span class="toc-number">1.1.</span> <span class="toc-text">1.1. 进程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-1-%E8%BF%9B%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1.1. 进程模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-2-%E5%88%9B%E5%BB%BA%E8%BF%9B%E7%A8%8B"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.1.2. 创建进程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-3-%E8%BF%9B%E7%A8%8B%E7%9A%84%E7%BB%88%E6%AD%A2"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.1.3. 进程的终止</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-4-%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84"><span class="toc-number">1.1.4.</span> <span class="toc-text">1.1.4. 进程的层次结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-5-%E8%BF%9B%E7%A8%8B%E7%9A%84%E7%8A%B6%E6%80%81"><span class="toc-number">1.1.5.</span> <span class="toc-text">1.1.5. 进程的状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-6-%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.1.6.</span> <span class="toc-text">1.1.6. 进程的实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E7%BA%BF%E7%A8%8B"><span class="toc-number">1.2.</span> <span class="toc-text">1.2. 线程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-1-%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">1.2.1.</span> <span class="toc-text">1.2.1. 线程的使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-2-%E7%BB%8F%E5%85%B8%E7%9A%84%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.2.2.</span> <span class="toc-text">1.2.2. 经典的线程模型</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-%E5%9C%A8%E7%94%A8%E6%88%B7%E7%A9%BA%E9%97%B4%E4%B8%AD%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B"><span class="toc-number">1.3.</span> <span class="toc-text">1.3. 在用户空间中实现线程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-1-%E5%9C%A8%E5%86%85%E6%A0%B8%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B"><span class="toc-number">1.3.1.</span> <span class="toc-text">1.3.1. 在内核实现线程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-2-%E5%BC%B9%E5%87%BA%E5%BC%8F%E7%BA%BF%E7%A8%8B"><span class="toc-number">1.3.2.</span> <span class="toc-text">1.3.2. 弹出式线程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-%E8%BF%9B%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1"><span class="toc-number">1.4.</span> <span class="toc-text">1.4. 进程间通信</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-1-%E7%AB%9E%E4%BA%89%E6%9D%A1%E4%BB%B6"><span class="toc-number">1.4.1.</span> <span class="toc-text">1.4.1. 竞争条件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-2-%E4%B8%B4%E7%95%8C%E5%8C%BA"><span class="toc-number">1.4.2.</span> <span class="toc-text">1.4.2. 临界区</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-3-%E5%BF%99%E7%AD%89%E5%BE%85%E4%BA%92%E6%96%A5"><span class="toc-number">1.4.3.</span> <span class="toc-text">1.4.3. 忙等待互斥</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-3-1-%E5%B1%8F%E8%94%BD%E4%B8%AD%E6%96%AD"><span class="toc-number">1.4.3.1.</span> <span class="toc-text">1.4.3.1. 屏蔽中断</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-3-2-%E9%94%81%E5%8F%98%E9%87%8F"><span class="toc-number">1.4.3.2.</span> <span class="toc-text">1.4.3.2. 锁变量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-3-3-%E4%B8%A5%E6%A0%BC%E8%BD%AE%E6%8D%A2%E6%B3%95"><span class="toc-number">1.4.3.3.</span> <span class="toc-text">1.4.3.3. 严格轮换法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-3-4-Peterson%E8%A7%A3%E6%B3%95"><span class="toc-number">1.4.3.4.</span> <span class="toc-text">1.4.3.4. Peterson解法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-3-5-TSL%E6%8C%87%E4%BB%A4"><span class="toc-number">1.4.3.5.</span> <span class="toc-text">1.4.3.5. TSL指令</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-3-6-%E7%9D%A1%E7%9C%A0%E4%B8%8E%E5%94%A4%E9%86%92"><span class="toc-number">1.4.3.6.</span> <span class="toc-text">1.4.3.6. 睡眠与唤醒</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-4-%E4%BF%A1%E5%8F%B7%E9%87%8F"><span class="toc-number">1.4.4.</span> <span class="toc-text">1.4.4. 信号量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-5-%E4%BA%92%E6%96%A5%E9%87%8F"><span class="toc-number">1.4.5.</span> <span class="toc-text">1.4.5. 互斥量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-6-%E7%AE%A1%E7%A8%8B"><span class="toc-number">1.4.6.</span> <span class="toc-text">1.4.6. 管程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-7-%E6%B6%88%E6%81%AF%E4%BC%A0%E9%80%92"><span class="toc-number">1.4.7.</span> <span class="toc-text">1.4.7. 消息传递</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-8-%E5%B1%8F%E9%9A%9C"><span class="toc-number">1.4.8.</span> <span class="toc-text">1.4.8. 屏障</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-5-%E8%B0%83%E5%BA%A6"><span class="toc-number">1.5.</span> <span class="toc-text">1.5. 调度</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-5-1-%E6%89%B9%E5%A4%84%E7%90%86%E7%B3%BB%E7%BB%9F%E5%9C%B0%E8%B0%83%E5%BA%A6"><span class="toc-number">1.5.1.</span> <span class="toc-text">1.5.1. 批处理系统地调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-5-2-%E4%BA%A4%E4%BA%92%E5%BC%8F%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E8%B0%83%E5%BA%A6"><span class="toc-number">1.5.2.</span> <span class="toc-text">1.5.2. 交互式系统中的调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-5-3-%E5%AE%9E%E6%97%B6%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E8%B0%83%E5%BA%A6"><span class="toc-number">1.5.3.</span> <span class="toc-text">1.5.3. 实时系统中的调度</span></a></li></ol></li></ol></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://i.loli.net/2020/03/22/JKpvE5waTZ6yfVz.png)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">crazyStrome的博客</a></span><span id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">现代操作系统-线程与进程</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-11-06T03:02:48.900Z" title="发表于 2020-11-06 11:02:48">2020-11-06</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-10-14T16:00:00.000Z" title="更新于 2020-10-15 00:00:00">2020-10-15</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><h1 id="1-进程与线程"><a href="#1-进程与线程" class="headerlink" title="1. 进程与线程"></a>1. 进程与线程</h1><h2 id="1-1-进程"><a href="#1-1-进程" class="headerlink" title="1.1. 进程"></a>1.1. 进程</h2><p>严格来说，在某一瞬间，CPU只能运行一个进程。但在1秒钟期间，它可以运行多个进程，这样就产生并行的错觉。这也称为伪并行，一次来区分<strong>多处理器系统</strong>（该系统有两个或者多个CPU共享同一个物理内存）的真正硬件并行。</p>
+<hr>
+<h3 id="1-1-1-进程模型"><a href="#1-1-1-进程模型" class="headerlink" title="1.1.1. 进程模型"></a>1.1.1. 进程模型</h3><p>计算机上所有课运行的软件，通常也包括操作系统，被组织成若干顺序进程，简称<strong>进程</strong>。</p>
+<p>一个进程是某种类型的一个活动，它有程序、输入、暑促以及状态。耽搁处理器可以被多个进程共享，它使用某种调度算法决定何时停止一个进程的工作，转而为另一个进程提供服务。</p>
+<hr>
+<h3 id="1-1-2-创建进程"><a href="#1-1-2-创建进程" class="headerlink" title="1.1.2. 创建进程"></a>1.1.2. 创建进程</h3><p>有4中主要事件导致进程的<strong>创建</strong>：</p>
+<ol>
+<li><p>系统初始化</p>
+</li>
+<li><p>执行了正在运行的进程所谓的进程创建系统调用</p>
+</li>
+<li><p>用户请求创建一个新进程</p>
+</li>
+<li><p>一个批处理作业的初始化</p>
+<p>在Unix系统中，只有一个系统调用可以创建新进程：==fork==。这个系统调用会创建一个与调用进程相同的副本。进程创建之后，父进程和子进程各自有不同的地址空间，如果其中某个进程在其地址空间修改了一个字，这个修改对其他进程而言是不可见的。</p>
+</li>
+</ol>
+<hr>
+<h3 id="1-1-3-进程的终止"><a href="#1-1-3-进程的终止" class="headerlink" title="1.1.3. 进程的终止"></a>1.1.3. 进程的终止</h3><p>以下条件引起进程终止：</p>
+<ol>
+<li>正常退出</li>
+<li>出错退出</li>
+<li>严重错误</li>
+<li>被其他进程杀死</li>
+</ol>
+<hr>
+<h3 id="1-1-4-进程的层次结构"><a href="#1-1-4-进程的层次结构" class="headerlink" title="1.1.4. 进程的层次结构"></a>1.1.4. 进程的层次结构</h3><p>在Unix中，进程和它的所有子女以及后裔共同组成一个进程组。当用户从键盘发出一个信号时，该信号被送给当前与键盘相关的进程组的所有成员（它们通常是在当前窗口创建的所有的活动进程）。每个进程可以分别捕获该信号、忽略该信号或采取默认操作的动作，即被该信号==杀死==。</p>
+<hr>
+<h3 id="1-1-5-进程的状态"><a href="#1-1-5-进程的状态" class="headerlink" title="1.1.5. 进程的状态"></a>1.1.5. 进程的状态</h3><p>每个进程有自己的程序计数器和内部状态，进程之间经常需要互相作用。</p>
+<p>进程有三种状态：</p>
+<ol>
+<li>运行态</li>
+<li>就绪态</li>
+<li>阻塞态</li>
+</ol>
+<p>前两种状态可以相互转换。</p>
+<p><img src="https://i.loli.net/2020/03/22/JKpvE5waTZ6yfVz.png"></p>
+<hr>
+<h3 id="1-1-6-进程的实现"><a href="#1-1-6-进程的实现" class="headerlink" title="1.1.6. 进程的实现"></a>1.1.6. 进程的实现</h3><p>内核中维护一个进程表。每个进程占用一个表项。该表项包含进程运行的重要信息。</p>
+<hr>
+<h2 id="1-2-线程"><a href="#1-2-线程" class="headerlink" title="1.2. 线程"></a>1.2. 线程</h2><h3 id="1-2-1-线程的使用"><a href="#1-2-1-线程的使用" class="headerlink" title="1.2.1. 线程的使用"></a>1.2.1. 线程的使用</h3><p>需要多线程的理由：</p>
+<ol>
+<li>简化系统设计，多线程可以共享同一地址空间和所有可用数据。</li>
+<li>线程比进程更轻量级，所以比进程更容易创建和销毁。</li>
+<li>多线程可以加速IO操作和大量计算的处理过程。</li>
+<li>在多CPU系统，可以实现真正的并行。</li>
+</ol>
+<hr>
+<h3 id="1-2-2-经典的线程模型"><a href="#1-2-2-经典的线程模型" class="headerlink" title="1.2.2. 经典的线程模型"></a>1.2.2. 经典的线程模型</h3><p>每个线程拥有一个程序计数器、寄存器和堆栈。</p>
+<p>进程是资源分配的基本单位。线程是CPU分派和调度的基本单位。</p>
+<p>在同一个进程中并行运行多个线程，是对在同一台计算机上并行运行多个进程的模拟。在前一种情况下，多个线程共享同一个地址空间额其他资源。而在后一种情况，多个进程共享物理内存、磁盘、打印机等相关资源。由于线程具有进程的某些性质，所以有时候被称为**==轻量级进程==**。</p>
+<table>
+<thead>
+<tr>
+<th>每个进程中的内容</th>
+<th align="left">每个线程中的内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>地址空间</td>
+<td align="left">程序计数器</td>
+</tr>
+<tr>
+<td>全局变量</td>
+<td align="left">寄存器</td>
+</tr>
+<tr>
+<td>打开文件</td>
+<td align="left">堆栈</td>
+</tr>
+<tr>
+<td>子进程</td>
+<td align="left">状态</td>
+</tr>
+<tr>
+<td>即将发生的报警</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td>信号与信号处理程序</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td>账号信息</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>线程可以处于运行、阻塞、就绪、终止的任何一个状态。</p>
+<p>在多线程的情况下，进程通常会从当前的单个线程开始。这个线程有能力通过调用一个函数<code>thread_create</code>创建新的线程。当一个线程完成工作后，调用<code>thread_exit</code>退出。在某些线程系统中，通过调用一个过程，例如<code>thread_join</code>，一个线程可以等待一个特性的线程退出。<code>thread_yield</code>允许线程自动放弃CPU而让另一个线程运行。</p>
+<hr>
+<h2 id="1-3-在用户空间中实现线程"><a href="#1-3-在用户空间中实现线程" class="headerlink" title="1.3. 在用户空间中实现线程"></a>1.3. 在用户空间中实现线程</h2><p>两种主要的方法实现线程包：在用户空间和内核中。</p>
+<p>把线程包放在用户空间中，内核对线程包一无所知。用户级线程包可以在不支持线程的操作系统上实现。用户控件关系线程时，进程需要有专用的线程表，来跟踪该进程中的线程。</p>
+<p>进程与线程有一个关键的差别。在线程运行完成时，<code>thread_yield</code>可以把该线程的信息保存在线程表中，保存该线程和状态都是本地过程，所以比内核调用效率要高。另一方面不需要trap，不需要上下文切换，使得线程调度非常快捷。</p>
+<p>用户级线程可以允许每个进程有自己定制的调度算法。</p>
+<p>用户级线程在一个线程使用系统调用阻塞后，该进程的所有线程都阻塞。</p>
+<p>用户级线程无法被CPU调度剥夺时间片。</p>
+<hr>
+<h3 id="1-3-1-在内核实现线程"><a href="#1-3-1-在内核实现线程" class="headerlink" title="1.3.1. 在内核实现线程"></a>1.3.1. 在内核实现线程</h3><p>进行操作时需要系统调用，开销大。</p>
+<h3 id="1-3-2-弹出式线程"><a href="#1-3-2-弹出式线程" class="headerlink" title="1.3.2. 弹出式线程"></a>1.3.2. 弹出式线程</h3><p>一个消息的到达导致系统创建一个处理该消息的线程，称为弹出式线程。</p>
+<hr>
+<h2 id="1-4-进程间通信"><a href="#1-4-进程间通信" class="headerlink" title="1.4. 进程间通信"></a>1.4. 进程间通信</h2><h3 id="1-4-1-竞争条件"><a href="#1-4-1-竞争条件" class="headerlink" title="1.4.1. 竞争条件"></a>1.4.1. 竞争条件</h3><p>两个或多个进程读写某些共享数据，而最后的结果取决于进程运行的精确时序，称为**==竞争条件==**。</p>
+<h3 id="1-4-2-临界区"><a href="#1-4-2-临界区" class="headerlink" title="1.4.2. 临界区"></a>1.4.2. 临界区</h3><p>**==互斥==**：以某种手段确保当一个进程在使用一个共享变量或文件时，其他进程不能做同样的操作。</p>
+<p>接下来介绍几种互斥的方案。</p>
+<h3 id="1-4-3-忙等待互斥"><a href="#1-4-3-忙等待互斥" class="headerlink" title="1.4.3. 忙等待互斥"></a>1.4.3. 忙等待互斥</h3><h4 id="1-4-3-1-屏蔽中断"><a href="#1-4-3-1-屏蔽中断" class="headerlink" title="1.4.3.1. 屏蔽中断"></a>1.4.3.1. 屏蔽中断</h4><p>进程在刚进入临界区就屏蔽中断，离开打开中断。用户使用可能出现崩溃。</p>
+<h4 id="1-4-3-2-锁变量"><a href="#1-4-3-2-锁变量" class="headerlink" title="1.4.3.2. 锁变量"></a>1.4.3.2. 锁变量</h4><p>加锁，不是原子操作可能导致竞争条件。</p>
+<h4 id="1-4-3-3-严格轮换法"><a href="#1-4-3-3-严格轮换法" class="headerlink" title="1.4.3.3. 严格轮换法"></a>1.4.3.3. 严格轮换法</h4><p>严格控制进程轮换进入临界区。</p>
+<h4 id="1-4-3-4-Peterson解法"><a href="#1-4-3-4-Peterson解法" class="headerlink" title="1.4.3.4. Peterson解法"></a>1.4.3.4. Peterson解法</h4><h4 id="1-4-3-5-TSL指令"><a href="#1-4-3-5-TSL指令" class="headerlink" title="1.4.3.5. TSL指令"></a>1.4.3.5. TSL指令</h4><p>使用会标TSL或XCHG指令。</p>
+<h4 id="1-4-3-6-睡眠与唤醒"><a href="#1-4-3-6-睡眠与唤醒" class="headerlink" title="1.4.3.6. 睡眠与唤醒"></a>1.4.3.6. 睡眠与唤醒</h4><p>**==优先级翻转==**：优先级高的进程等待优先级低的进程释放临界区。</p>
+<h3 id="1-4-4-信号量"><a href="#1-4-4-信号量" class="headerlink" title="1.4.4. 信号量"></a>1.4.4. 信号量</h3><p>down：检查信号量，如果为0则睡眠，如果大于0，则减一，进入临界区。</p>
+<p>up：退出时，将信号量加一。</p>
+<p>信号量的另一种用途是实现同步。</p>
+<h3 id="1-4-5-互斥量"><a href="#1-4-5-互斥量" class="headerlink" title="1.4.5. 互斥量"></a>1.4.5. 互斥量</h3><p>如果不需要信号量的计数能力，就可以使用互斥量，进行解锁和加锁。</p>
+<h3 id="1-4-6-管程"><a href="#1-4-6-管程" class="headerlink" title="1.4.6. 管程"></a>1.4.6. 管程</h3><p>高级同步原语。</p>
+<p>任何时刻管程中只有一个活跃进程。</p>
+<h3 id="1-4-7-消息传递"><a href="#1-4-7-消息传递" class="headerlink" title="1.4.7. 消息传递"></a>1.4.7. 消息传递</h3><p>使用消息队列</p>
+<h3 id="1-4-8-屏障"><a href="#1-4-8-屏障" class="headerlink" title="1.4.8. 屏障"></a>1.4.8. 屏障</h3><p>用来同步多进程工作，以便于进行下一步操作。</p>
+<hr>
+<h2 id="1-5-调度"><a href="#1-5-调度" class="headerlink" title="1.5. 调度"></a>1.5. 调度</h2><p><img src="https://i.loli.net/2020/03/22/ocXPb7fOvDwIN9G.png" alt="1584753880853"></p>
+<p>吞吐量是系统每小时完成的作业数量。</p>
+<p>周转时间是一个批处理作业提交开始到完成时刻的统计平均时间。</p>
+<p>最小响应时间是发出命令到得到相应之间的时间。</p>
+<h3 id="1-5-1-批处理系统地调度"><a href="#1-5-1-批处理系统地调度" class="headerlink" title="1.5.1. 批处理系统地调度"></a>1.5.1. 批处理系统地调度</h3><ol>
+<li>先来先服务，按照顺序进行，比较公平，对IO密集型不友好</li>
+<li>最短作业优先，长作业得不到运行</li>
+<li>最短剩余时间优先，长作业得不到运行</li>
+</ol>
+<h3 id="1-5-2-交互式系统中的调度"><a href="#1-5-2-交互式系统中的调度" class="headerlink" title="1.5.2. 交互式系统中的调度"></a>1.5.2. 交互式系统中的调度</h3><ol>
+<li>轮转调度，对最后的短作业不友好</li>
+<li>优先级调度</li>
+<li>多级队列，一个作业用完时间片后移到下一个队列</li>
+<li>最短进程优先</li>
+<li>保证调度，通过计算进程使用过的CPU时间获取将得到的使用时间</li>
+<li>彩票制度，不同的进程分配不同的彩票数量，随机选择彩票</li>
+<li>公平分享调度</li>
+</ol>
+<h3 id="1-5-3-实时系统中的调度"><a href="#1-5-3-实时系统中的调度" class="headerlink" title="1.5.3. 实时系统中的调度"></a>1.5.3. 实时系统中的调度</h3></div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">crazyStrome</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://crazystrome.github.io/2020/11/06/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/">http://crazystrome.github.io/2020/11/06/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://crazyStrome.github.io" target="_blank">crazyStrome的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%AC%94%E8%AE%B0/">笔记</a><a class="post-meta__tags" href="/tags/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">现代操作系统</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2020/03/22/JKpvE5waTZ6yfVz.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2020/11/06/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA/"><img class="prev-cover" src="https://cloud.addictivetips.com/wp-content/uploads/2019/02/android-linux.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">现代操作系统-输入与输出</div></div></a></div><div class="next-post pull-right"><a href="/2020/11/06/%E7%8E%B0%E4%BB%A3%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E5%A4%9A%E5%AA%92%E4%BD%93%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"><img class="next-cover" src="https://i.loli.net/2020/04/08/7eJzHjPTSwYWl6v.png" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">现代操作系统-多媒体操作系统</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2020/11/06/现代操作系统-存储管理/" title="现代操作系统-存储管理"><img class="cover" src="https://i.loli.net/2020/03/22/9yCYB1jN7tVeMxW.png"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-06</div><div class="title">现代操作系统-存储管理</div></div></a></div><div><a href="/2020/11/06/现代操作系统-多媒体操作系统/" title="现代操作系统-多媒体操作系统"><img class="cover" src="https://i.loli.net/2020/04/08/7eJzHjPTSwYWl6v.png"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-06</div><div class="title">现代操作系统-多媒体操作系统</div></div></a></div><div><a href="/2020/11/06/现代操作系统-文件系统/" title="现代操作系统-文件系统"><img class="cover" src="https://i.loli.net/2020/04/05/ki9twEGQNhURaBS.png"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-06</div><div class="title">现代操作系统-文件系统</div></div></a></div><div><a href="/2020/11/06/现代操作系统-多处理机系统/" title="现代操作系统-多处理机系统"><img class="cover" src="https://i.loli.net/2020/04/08/xzHkBq9lG23aytP.png"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-06</div><div class="title">现代操作系统-多处理机系统</div></div></a></div><div><a href="/2020/11/06/现代操作系统-死锁/" title="现代操作系统-死锁"><img class="cover" src="https://cloud.addictivetips.com/wp-content/uploads/2019/02/android-linux.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-06</div><div class="title">现代操作系统-死锁</div></div></a></div><div><a href="/2020/11/06/现代操作系统-输入输出/" title="现代操作系统-输入与输出"><img class="cover" src="https://cloud.addictivetips.com/wp-content/uploads/2019/02/android-linux.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-11-06</div><div class="title">现代操作系统-输入与输出</div></div></a></div></div></div></article></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 By crazyStrome</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="chat_btn" type="button" title="rightside.chat_btn"><i class="fas fa-sms"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><div class="js-pjax"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>
