@@ -1,0 +1,244 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CS6.824 Lab1 | crazyStrome的博客</title><meta name="keywords" content="golang,分布式"><meta name="author" content="crazyStrome"><meta name="copyright" content="crazyStrome"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><meta name="description" content="CS6.824 Lab16.824 Lab1的具体要求见如下链接： lab1 建议：做lab之前建议先读一下该课程给的论文，然后学习它的上课视频。论文在schedule中都给出了，上课视频有同学搬运到了B站，搜索关键字就可以看到。 lab1的内容是实现一个MapReduce服务，主要包括一个Master和许多个Worker，Worker向Master获取任务，执行之后再汇总给Master。lab1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS6.824 Lab1">
+<meta property="og:url" content="http://crazystrome.github.io/2020/12/18/MIT6.824-LAB1/index.html">
+<meta property="og:site_name" content="crazyStrome的博客">
+<meta property="og:description" content="CS6.824 Lab16.824 Lab1的具体要求见如下链接： lab1 建议：做lab之前建议先读一下该课程给的论文，然后学习它的上课视频。论文在schedule中都给出了，上课视频有同学搬运到了B站，搜索关键字就可以看到。 lab1的内容是实现一个MapReduce服务，主要包括一个Master和许多个Worker，Worker向Master获取任务，执行之后再汇总给Master。lab1">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://www.bingimg.cn/down/OHR.KobukRiver_ZH-CN9932342738_1920x1080.jpg">
+<meta property="article:published_time" content="2020-12-18T03:17:27.394Z">
+<meta property="article:modified_time" content="2020-12-17T12:17:28.710Z">
+<meta property="article:author" content="crazyStrome">
+<meta property="article:tag" content="golang">
+<meta property="article:tag" content="分布式">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://www.bingimg.cn/down/OHR.KobukRiver_ZH-CN9932342738_1920x1080.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://crazystrome.github.io/2020/12/18/MIT6.824-LAB1/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.2.0',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  ClickShowText: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+  },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: true,
+  isSidebar: true,
+  postUpdate: '2020-12-17 20:17:28'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(function () {
+  window.activateDarkMode = function () {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+    }
+  }
+  window.activateLightMode = function () {
+    document.documentElement.setAttribute('data-theme', 'light')
+    if (document.querySelector('meta[name="theme-color"]') !== null) {
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+    }
+  }
+
+  const autoChangeMode = 'false'
+  const t = saveToLocal.get('theme')
+  if (autoChangeMode === '1') {
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+    const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+    const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+    if (t === undefined) {
+      if (isLightMode) activateLightMode()
+      else if (isDarkMode) activateDarkMode()
+      else if (isNotSpecified || hasNoSupport) {
+        const now = new Date()
+        const hour = now.getHours()
+        const isNight = hour <= 6 || hour >= 18
+        isNight ? activateDarkMode() : activateLightMode()
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+        if (saveToLocal.get('theme') === undefined) {
+          e.matches ? activateDarkMode() : activateLightMode()
+        }
+      })
+    } else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else if (autoChangeMode === '2') {
+    const now = new Date()
+    const hour = now.getHours()
+    const isNight = hour <= 6 || hour >= 18
+    if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+    else if (t === 'light') activateLightMode()
+    else activateDarkMode()
+  } else {
+    if (t === 'dark') activateDarkMode()
+    else if (t === 'light') activateLightMode()
+  }
+})()</script><meta name="generator" content="Hexo 5.2.0"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="https://avatars2.githubusercontent.com/u/24493607?s=460&amp;u=ae13dfdaed519e38912080c57dd919504d032754&amp;v=4" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">48</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">24</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">8</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#CS6-824-Lab1"><span class="toc-number">1.</span> <span class="toc-text">CS6.824 Lab1</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#MapReduce%E7%BB%93%E6%9E%84%E4%BD%93"><span class="toc-number">1.1.</span> <span class="toc-text">MapReduce结构体</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Master%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.2.</span> <span class="toc-text">Master实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E5%8F%B0poller"><span class="toc-number">1.2.1.</span> <span class="toc-text">后台poller</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#getTask"><span class="toc-number">1.2.2.</span> <span class="toc-text">getTask</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#submit"><span class="toc-number">1.2.3.</span> <span class="toc-text">submit</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Worker%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.3.</span> <span class="toc-text">Worker实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#singleWorker%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.3.1.</span> <span class="toc-text">singleWorker实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">1.4.</span> <span class="toc-text">总结</span></a></li></ol></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(http://www.bingimg.cn/down/OHR.KobukRiver_ZH-CN9932342738_1920x1080.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">crazyStrome的博客</a></span><span id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">CS6.824 Lab1</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-12-18T03:17:27.394Z" title="发表于 2020-12-18 11:17:27">2020-12-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-12-17T12:17:28.710Z" title="更新于 2020-12-17 20:17:28">2020-12-17</time></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><h1 id="CS6-824-Lab1"><a href="#CS6-824-Lab1" class="headerlink" title="CS6.824 Lab1"></a>CS6.824 Lab1</h1><p>6.824 Lab1的具体要求见如下链接：</p>
+<p><a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/labs/lab-mr.html">lab1</a></p>
+<p>建议：做lab之前建议先读一下该课程给的论文，然后学习它的上课视频。论文在<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/schedule.html">schedule</a>中都给出了，上课视频有同学搬运到了B站，搜索关键字就可以看到。</p>
+<p>lab1的内容是实现一个MapReduce服务，主要包括一个Master和许多个Worker，Worker向Master获取任务，执行之后再汇总给Master。lab1中已经实现了map函数和reduce函数，用来执行任务，但是任务的调度等则需要具体实现。</p>
+<p>这个lab看起来很简单，但是因为涉及到并发则比较麻烦。处理并发的方法一般是给临界资源加锁，但是加锁的粒度和顺序也有待商榷，粒度太大会导致并发效率低下，而锁的粒度小的话，加锁顺序不一致会导致死锁。</p>
+<p>Golang的思想是“通过通信来共享内存，而不是通过共享内存来通信”，所以可以通过golang的channel来实现并发的处理。</p>
+<h2 id="MapReduce结构体"><a href="#MapReduce结构体" class="headerlink" title="MapReduce结构体"></a>MapReduce结构体</h2><p>WorkerInfo是和Worker相关的结构体对象，内部包含了Worker的ID。Worker通过RPC向Master请求任务时会携带WorkerInfo信息。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> WorkerInfo <span class="keyword">struct</span> &#123;</span><br><span class="line">	ID <span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Task包含了Master分配给Worker的任务的具体内容。</p>
+<ul>
+<li>ID： Master分配唯一任务ID</li>
+<li>Type： Master分配任务类型。分别有NOTASK、MAP、REDUCE、RETRY、COMPLETE</li>
+<li>Content：Master分配任务的具体内容。当任务类型是MAP时，Content是需要计算词频的文件内容；当任务类型是REDUCE时，Content是Bucket序列化的json字符串</li>
+<li>FileName： Master分配任务的文件名。当任务类型是MAP时，FileName是需要计算词频的文件名；当任务类型是REDUCE时，FileName是Worker需要保存到的文件名，但是Worker不会保存到该文件中，而是先保存到一个临时文件，再通过Master把该文件命名为FileName。</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Task <span class="keyword">struct</span> &#123;</span><br><span class="line">	ID       <span class="keyword">string</span></span><br><span class="line">	Type     TaskType</span><br><span class="line">	Content  <span class="keyword">string</span></span><br><span class="line">	FileName <span class="keyword">string</span></span><br><span class="line">	Worker   *WorkerInfo</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>TaskType表示Task的具体类型。</p>
+<ul>
+<li>NOTASK： Master没有可用的Task可以分配给Worker，此时表示所有的工作已经完成了；Worker收到此类任务类型的话直接退出执行任务。</li>
+<li>MAP： Master分配了一个Map任务给Worker</li>
+<li>REDUCE： Master分配了一个REDUCE任务给Worker</li>
+<li>RETRY： Master当前没有可分配的任务，所有的任务要么正在执行要么已经执行成功了；Worker会等待一段时间再向Master获取任务。</li>
+<li>COMPLETE： 在Worker提交完执行结果后，Master把该任务标记为COMPLETE</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> TaskType <span class="keyword">uint8</span></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	NOTASK TaskType = <span class="literal">iota</span></span><br><span class="line">	MAP</span><br><span class="line">	REDUCE</span><br><span class="line">	RETRY</span><br><span class="line">	COMPLETE</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>Result中包含了Worker执行Task后的结果。</p>
+<ul>
+<li>Type： 执行的任务类型，如果Worker在执行过程中出错的话会返回一个NOTASK的Result，Master收到后会返回一个FAIL的statusCode</li>
+<li>TaskFileName：执行的Task中的FileName，便于Master通过FileName查找对应的Task</li>
+<li>TaskID： 执行的Task中的ID</li>
+<li>Content：如果是Map任务的执行结果，Content中是Map获得的KeyValue切片构成的json字符串；如果是Reduce任务的执行结果，Content中则是Worker创建的临时文件名，Master收到后会进行rename。</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Result <span class="keyword">struct</span> &#123;</span><br><span class="line">	Type         TaskType</span><br><span class="line">	TaskFileName <span class="keyword">string</span></span><br><span class="line">	TaskID       <span class="keyword">string</span></span><br><span class="line">	Content      <span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Status包含Master回复Worker执行的任务结果，其中包含了一个StatusCode。</p>
+<ul>
+<li>SUCCESS： 表示任务执行成功，Master会标记相关的任务为完成；Worker继续获取下一个任务。</li>
+<li>TIMEOUT： Master发现该返回结果的Worker和之前记录的Worker不同或者不存在记录中，说明该Task已经因为超时被移除了，Worker收到该回复后也会退出不再执行。</li>
+<li>FAIL： 在执行过程中，如果Worker执行出错，会返回一个NOTASK的Result；或者Master在处理Result的过程出错都会返回FAIL给Worker。</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> StatusCode <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	SUCCESS StatusCode = <span class="literal">iota</span></span><br><span class="line">	TIMEOUT</span><br><span class="line">	FAIL</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Status <span class="keyword">struct</span> &#123;</span><br><span class="line">	ResCode StatusCode</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Master实现"><a href="#Master实现" class="headerlink" title="Master实现"></a>Master实现</h2><p>Master是表示服务端的一个实体，用来实现任务分配等相关内容。</p>
+<ul>
+<li>workerCh： 用来传输workerInfo</li>
+<li>taskCh： 用来传输Task</li>
+<li>resultCh： 用来传输Result</li>
+<li>statusCh： 用来传输Status</li>
+<li>taskMap： 记录FileName对应的Task，不论是Map任务还是Reduce任务</li>
+<li>removeTaskCh：传输FileName，将taskMap中FileName对应的Task删除。在超时的时候使用该channel</li>
+<li>taskMapDone： 记录FileName对应的Done channel，Done channel是一个随Task一起创建的channel，当任务完成时会调用Close(Done)实现关闭广播。</li>
+<li>removeDoneCh： 传输FileName，将taskMapDone中FileName对应的Done删除掉。在超时或者close(done)时都会使用。</li>
+<li>files：记录了需要使用Map函数处理的文件列表，使用map来保存是为了方便删除，当对文件读取出错时会将该文件删除，同时mapTaskCount++</li>
+<li>mapTaskCount： 记录执行完成的Map任务，当Worker返回的Result中有正确的数据时才表示执行完成，将mapTaskCount++；此外，Master读取文件出错时也会将mapTaskCount++</li>
+<li>nReduce： Master将reduce的分片数量，在初始化的时候赋值</li>
+<li>reduceBuckets： Master把map任务的结果KeyValue对分别通过Key的hash值放到对应的Bucket，Bucket是一个<code>map[string][]string</code>类型，保存Key以及他对应的Value切片</li>
+<li>reduceTaskCount：记录执行完成的Reduce任务，当Worker返回的Result中有正确的数据</li>
+<li>doneReq：向Master查询是否完成的通道</li>
+<li>doneReply：Master回复是否完成的channel</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Master <span class="keyword">struct</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 通信通道，这样就避免锁的使用</span></span><br><span class="line">	workerCh <span class="keyword">chan</span> *WorkerInfo</span><br><span class="line">	taskCh   <span class="keyword">chan</span> *Task</span><br><span class="line">	resultCh <span class="keyword">chan</span> *Result</span><br><span class="line">	statusCh <span class="keyword">chan</span> *Status</span><br><span class="line"></span><br><span class="line">	removeTaskCh <span class="keyword">chan</span> <span class="keyword">string</span></span><br><span class="line">	removeDoneCh <span class="keyword">chan</span> <span class="keyword">string</span></span><br><span class="line">	taskMapDone  <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// map[fileName]*Task</span></span><br><span class="line">	taskMap <span class="keyword">map</span>[<span class="keyword">string</span>]*Task</span><br><span class="line">	files   <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">bool</span></span><br><span class="line"></span><br><span class="line">	mapTaskCount <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line">	nReduce <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line">	reduceBuckets   []Bucket</span><br><span class="line">	reduceTaskCount <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line">	doneReq   <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">	doneReply <span class="keyword">chan</span> <span class="keyword">bool</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="后台poller"><a href="#后台poller" class="headerlink" title="后台poller"></a>后台poller</h3><p>Master在后台开启一个goroutine，用来处理channel到达的请求。如果是workerCh，会调用getTask获取任务；如果是resultCh，会调用submit提交任务；如果是removeTaskCh，会从taskMap中删除fileName对应的Task；如果是removeDoneCh，会通taskMapDone中删除对应的Done channel；如果是doneReq，说明有调用者查询是否任务全完成了，通过判断len(files)==mapTaskCount &amp;&amp; len(reduceButkets) == reduceTaskCount</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Master)</span> <span class="title">HandleRequest</span><span class="params">()</span></span> &#123;</span><br><span class="line">	log.Printf(<span class="string">&quot;master process channel request background\n&quot;</span>)</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> worker := &lt;-m.workerCh:</span><br><span class="line">			m.taskCh &lt;- m.getTask(worker)</span><br><span class="line">		<span class="keyword">case</span> result := &lt;-m.resultCh:</span><br><span class="line">			m.statusCh &lt;- m.submit(result)</span><br><span class="line">		<span class="keyword">case</span> fileName := &lt;-m.removeTaskCh:</span><br><span class="line">			<span class="built_in">delete</span>(m.taskMap, fileName)</span><br><span class="line">		<span class="keyword">case</span> fileName := &lt;-m.removeDoneCh:</span><br><span class="line">			<span class="built_in">delete</span>(m.taskMapDone, fileName)</span><br><span class="line">		<span class="keyword">case</span> &lt;-m.doneReq:</span><br><span class="line">			m.doneReply &lt;- (<span class="built_in">len</span>(m.files) == m.mapTaskCount &amp;&amp; m.nReduce == m.reduceTaskCount)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="getTask"><a href="#getTask" class="headerlink" title="getTask"></a>getTask</h3><p>这个方法是用来获取可用的任务的。</p>
+<p>如果mapTaskCount&lt;len(files)，意味着map任务还没有完全执行完，就可以进行Map任务的分配。</p>
+<ul>
+<li>首先判断len(files)==len(m.taskMap)，如果相等，则表明当前所有的Map任务都被分配出去了，并没有完全执行结束，Master会将task.Type设置为RETRY，表明Worker可以重新获取任务，等待别的任务超时失效。</li>
+<li>Master从files中查找一个没有被分配的fileName，读取它的内容，生成一个新的Task，并记录在TaskMap中；同时，构建一个done channel并开启一个新的goroutine，监控done和一个超时定时器，如果任务超时，Master会通过removeTaskCh把记录的Task删除。</li>
+</ul>
+<p>如果nReduce &gt; reduceTaskCount，意味着reduce任务还没有完全执行完，进行reduce任务的分配。</p>
+<ul>
+<li>如果len(taskMap)==len(files)+nReduce，说明当前的所有任务都分配出去了但是没有完全执行完成，Master将Task设置为RETRY，然后Worker可以重新获取任务，等待别的任务超时失效。</li>
+<li>Master从reduceBuckets查找一个没有记录的Bucket，封装为Task，记录在TaskMap中，同时设置超时取消。</li>
+</ul>
+<h3 id="submit"><a href="#submit" class="headerlink" title="submit"></a>submit</h3><p>Master通过submit判断Worker是否执行完成了。</p>
+<ul>
+<li>如果result.Type == NOTASK，说明Worker出错了，没有返回内容。需要把这个任务删除掉，并返回FAIL作为ResCode。代码中没有实现删除任务，因为等待任务超时之后会自动删除任务的。</li>
+<li>通过result.TaskFileName在taskMap中查找，如果已经不存在对应的Task或者Task.ID和result.TaskID不同，说明该Task已经因为超时删除了，Master会返回TIMEOUT作为ResCode</li>
+<li>接下来处理Worker返回的数据，如果是MAP任务，就把每个Key对应的Values对放在相应的reduceBucket中，通过Key的hash值查找对应的Bucket；如果是REDUCE任务，就把Content中的临时文件名Rename为FileName</li>
+</ul>
+<h2 id="Worker实现"><a href="#Worker实现" class="headerlink" title="Worker实现"></a>Worker实现</h2><p>Worker就比较简单了，其实就是不停的获取任务然后执行任务。这部分代码实现在singleWorker函数中，在Worker主函数中使用limit来控制并发数量，然后使用WaitGroup等待所有goroutine退出。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> limit = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">10</span>)</span><br><span class="line"><span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">20</span>; i++ &#123;</span><br><span class="line">	wg.Add(<span class="number">1</span>)</span><br><span class="line">	limit &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(wg *sync.WaitGroup)</span></span> &#123;</span><br><span class="line">		<span class="keyword">defer</span> wg.Done()</span><br><span class="line">		singleWorker(mapf, reducef)</span><br><span class="line">		&lt;-limit</span><br><span class="line">	&#125;(&amp;wg)</span><br><span class="line">&#125;</span><br><span class="line">wg.Wait()</span><br></pre></td></tr></table></figure>
+
+<p>但是在实际实现中，只使用了一个singleWorker来循环执行就可以了。</p>
+<h3 id="singleWorker实现"><a href="#singleWorker实现" class="headerlink" title="singleWorker实现"></a>singleWorker实现</h3><p>singleWorker实现很简单，就是不停的getTask、执行任务然后submit结果。</p>
+<ul>
+<li>首先判断Task.Type，如果是NOTASK，说明当前Master的所有任务都已经完成了，singleWorker就直接退出了</li>
+<li>如果是RETRY，singleWorker会sleep一段时间然后重新开始循环执行任务</li>
+<li>如果是MAP，singleWorker会把map函数的结果Marshal为json字符串返回</li>
+<li>如果是REDUCE，singleWorker会把Task.Content内容储存到一个临时文件中，然后把临时文件名放到result.Content中返回给Master</li>
+<li>singleWorker通过判断Result的内容，如果不是SUCCESS，说明任务执行失败，singleWorker就会直接退出</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Lab1的MapReduce说简单也简单，说难也难。我一开始使用了各种锁来实现并发的处理，但是因为锁加的顺序容易导致死锁，运行的时候也会产生数据的竞争。所以我就是用go的特性，直接使用channel来进行所有的处理，把所有对数据的操作都放到一个goroutine中。可能有人会说，所有的操作都放到一个goroutine中，不会导致任务被积压吗，其实不会的，这些数据操作都是很快的，使用的系统调用也是很少的，这些用时相比于Worker的网络和磁盘IO来说都是很短的，所以这个模式也是可以使用的。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">crazyStrome</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://crazystrome.github.io/2020/12/18/MIT6.824-LAB1/">http://crazystrome.github.io/2020/12/18/MIT6.824-LAB1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://crazyStrome.github.io" target="_blank">crazyStrome的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/golang/">golang</a><a class="post-meta__tags" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a></div><div class="post_share"><div class="social-share" data-image="http://www.bingimg.cn/down/OHR.KobukRiver_ZH-CN9932342738_1920x1080.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2020/11/11/injector%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E5%BA%93/"><img class="next-cover" src="https://cdn2.hubspot.net/hubfs/202339/golang.png" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">injector依赖注入库-golang实现</div></div></a></div></nav></article></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 By crazyStrome</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="chat_btn" type="button" title="rightside.chat_btn"><i class="fas fa-sms"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><div class="js-pjax"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>
